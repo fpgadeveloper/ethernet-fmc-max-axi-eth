@@ -42,7 +42,7 @@ the FMC connector on which to connect the Ethernet FMC Max. Some of the target d
 require a license to generate a bitstream with the AMD Xilinx tools.
 
 | Target board        | Target design     | Ports   | FMC Slot    | License<br> required |
-|---------------------|-------------------|---------|-------------|-------------|-----|
+|---------------------|-------------------|---------|-------------|----------------------|
 | [KCU105]            | `kcu105_hpc`      | 4x      | HPC         | YES |
 | [UltraZed-EV carrier] | `uzev`          | 4x      | HPC         | NO  |
 | [VCK190]            | `vck190_fmcp1`    | 4x      | FMCP1       | YES |
