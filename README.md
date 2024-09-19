@@ -58,6 +58,7 @@ require a license to generate a bitstream with the AMD Xilinx tools.
 | [ZCU106]            | `zcu106_hpc0`     | 4x      | HPC0        | NO  |
 | [ZCU111]            | `zcu111`          | 4x      | FMCP        | YES |
 | [ZCU208]            | `zcu208`          | 4x      | FMCP        | YES |
+| [ZCU216]            | `zcu216`          | 4x      | FMCP        | YES |
 
 ## Build instructions
 
@@ -110,4 +111,5 @@ updates on the awesome projects we work on.
 [ZCU102]: https://www.xilinx.com/zcu102
 [ZCU104]: https://www.xilinx.com/zcu104
 [ZCU106]: https://www.xilinx.com/zcu106
+[ZCU216]: https://www.xilinx.com/zcu216
 
