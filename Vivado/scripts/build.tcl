@@ -230,6 +230,9 @@ current_run -implementation [get_runs impl_1]
 
 puts "INFO: Project created:${design_name}"
 
+# Create the GT LOC dictionary that is used by the block design script
+source $origin_dir/src/bd/gt_locs.tcl
+
 # Create block design
 source $origin_dir/src/bd/bd_${bd_script}.tcl
 

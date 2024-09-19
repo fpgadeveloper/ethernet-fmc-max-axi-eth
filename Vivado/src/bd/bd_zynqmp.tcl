@@ -43,8 +43,6 @@ set oldCurInst [current_bd_instance .]
 # Set parent object as current
 current_bd_instance $parentObj
 
-set ports {0 1 2 3}
-
 # Add the Processor System and apply board preset
 create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e zynq_ultra_ps_e_0
 apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_board_preset "1" }  [get_bd_cells zynq_ultra_ps_e_0]
@@ -79,14 +77,20 @@ if { $num_ints > 8 } {
 
 # Add and configure AXI Ethernet IPs with AXI DMAs
 set port_with_shared_logic [lindex $ports 0]
-set gt_inc 1
 foreach port $ports {
   # Add the AXI Ethernet IPs
   create_bd_cell -type ip -vlnv xilinx.com:ip:axi_ethernet axi_ethernet_$port
   
+  # Get the GT location
+  set gt_loc [dict get $gt_loc_dict $target $port]
+
   # Configure the AXI Ethernet IP
   if {$port == $port_with_shared_logic} {
-    set_property -dict [list CONFIG.PHYADDR {2} CONFIG.PHY_TYPE {SGMII} CONFIG.SupportLevel {1}] [get_bd_cells axi_ethernet_$port]
+    set_property -dict [list CONFIG.PHYADDR {2} \
+                              CONFIG.PHY_TYPE {SGMII} \
+                              CONFIG.gtlocation $gt_loc \
+                              CONFIG.SupportLevel {1} \
+                              ] [get_bd_cells axi_ethernet_$port]
     connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk1] [get_bd_pins axi_ethernet_$port/ref_clk]
     # GT ref clock
     create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 gt_ref_clk
@@ -96,7 +100,11 @@ foreach port $ports {
     create_bd_intf_port -mode Master -vlnv xilinx.com:interface:mdio_rtl:1.0 mdio_io
     connect_bd_intf_net [get_bd_intf_pins axi_ethernet_${port}/mdio] [get_bd_intf_ports mdio_io]
   } else {
-    set_property -dict [list CONFIG.PHYADDR {2} CONFIG.PHY_TYPE {SGMII} CONFIG.SupportLevel {0}] [get_bd_cells axi_ethernet_$port]
+    set_property -dict [list CONFIG.PHYADDR {2} \
+                              CONFIG.PHY_TYPE {SGMII} \
+                              CONFIG.gtlocation $gt_loc \
+                              CONFIG.SupportLevel {0} \
+                              ] [get_bd_cells axi_ethernet_$port]
     connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk1] [get_bd_pins axi_ethernet_$port/ref_clk]
     # Shared clocks
     connect_bd_net [get_bd_pins axi_ethernet_$port_with_shared_logic/gtref_clk_out] [get_bd_pins axi_ethernet_$port/gtref_clk]
@@ -106,15 +114,6 @@ foreach port $ports {
     connect_bd_net [get_bd_pins axi_ethernet_$port_with_shared_logic/userclk2_out] [get_bd_pins axi_ethernet_$port/userclk2]
     connect_bd_net [get_bd_pins axi_ethernet_$port_with_shared_logic/pma_reset_out] [get_bd_pins axi_ethernet_$port/pma_reset]
     connect_bd_net [get_bd_pins axi_ethernet_$port_with_shared_logic/mmcm_locked_out] [get_bd_pins axi_ethernet_$port/mmcm_locked]
-    # Get the default GT location so that we can just increment to the next ones
-    set gt_default [get_property CONFIG.gtlocation [get_bd_cells axi_ethernet_$port]]
-    regexp {^(X\d+Y)(\d+)$} $gt_default all prefix num
-    # Increment the last number by gt inc
-    set new_num [expr {$num + $gt_inc}]
-    # Form the new string by concatenating the prefix and the incremented number
-    set new_gt "${prefix}${new_num}"
-    set_property CONFIG.gtlocation $new_gt [get_bd_cells axi_ethernet_$port]
-    set gt_inc [expr {$gt_inc + 1}]
   }
   
   # Add the DMA for the AXI Ethernet Subsystem
