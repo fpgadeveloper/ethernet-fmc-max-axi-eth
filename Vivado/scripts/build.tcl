@@ -49,6 +49,7 @@ dict set target_dict zcu104 { xilinx.com zcu104 zynqmp {0} }
 dict set target_dict zcu106_hpc0 { xilinx.com zcu106 zynqmp {0 1 2 3} }
 dict set target_dict zcu111 { xilinx.com zcu111 zynqmp {0 1 2 3} }
 dict set target_dict zcu208 { xilinx.com zcu208 zynqmp {0 1 2 3} }
+dict set target_dict zcu216 { xilinx.com zcu216 zynqmp {0 1 2 3} }
 
 # Function to display the options and get user input
 proc selectTarget {target_dict} {
