@@ -209,7 +209,7 @@ CONFIG_SUBSYSTEM_TF-A_EXTRA_COMPILER_FLAGS=""
 #
 # u-boot Configuration
 #
-CONFIG_SUBSYSTEM_UBOOT_CONFIG_TARGET="AUTO"
+CONFIG_SUBSYSTEM_UBOOT_CONFIG_TARGET="xilinx_zynqmp_virt_defconfig"
 
 #
 # u-boot script configuration

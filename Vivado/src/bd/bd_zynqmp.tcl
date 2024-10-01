@@ -51,6 +51,7 @@ create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e zynq_ultra_ps_e_0
 apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_board_preset "1" }  [get_bd_cells zynq_ultra_ps_e_0]
 
 # Configure the PS
+# Enable the PL1 CLK 50MHz for AXI Ethernet ref_clk
 set_property -dict [list CONFIG.PSU__USE__M_AXI_GP1 {0} \
 CONFIG.PSU__USE__S_AXI_GP2 {1} \
 CONFIG.PSU__USE__IRQ0 {1} \
@@ -60,6 +61,24 @@ CONFIG.PSU__TTC0__PERIPHERAL__IO {EMIO} \
 CONFIG.PSU__CRL_APB__PL1_REF_CTRL__FREQMHZ {50.000} \
 CONFIG.PSU__FPGA_PL1_ENABLE {1} \
 ] [get_bd_cells zynq_ultra_ps_e_0]
+
+# AXI Eth ref_clk
+set ref_clk "zynq_ultra_ps_e_0/pl_clk1"
+
+# UltraZed-EV Carrier: Must use IOPLL clock source for the 50MHz clock (ref_clk)
+# For reasons unknown, we have needed to source the 50MHz ref_clk from IOPLL (instead of RPLL) for the Ethernet
+# ports to function correctly in PetaLinux.
+# We found that the PL1 clock would not be set to the correct frequency in PetaLinux when sourced from RPLL.
+#   - Verified using command: sudo cat /sys/kernel/debug/clk/pl1_ref/clk_rate
+# The incorrect clock frequency leads to the SGMII PHYs responding to all reads with 0xFFFF, and link-up never
+# being reached.
+#   - Verified using command: sudo phytool read eth0/0x02/0x0000
+# This problem did not affect baremetal applications (ie. using RPLL is fine in baremetal).
+# This problem does not affect the Xilinx boards (ZCU102, ZCU106, ...).
+# It is likely that the UltraZed-EV BSP changes the RPLL configuration, but this requires further examination.
+if {$board_name == "ultrazed_7ev_cc"} {
+  set_property -dict [list CONFIG.PSU__CRL_APB__PL1_REF_CTRL__SRCSEL {IOPLL} ] [get_bd_cells zynq_ultra_ps_e_0]
+}
 
 # Connect the FCLK_CLK0 to the PS GP0 and HP0
 connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins zynq_ultra_ps_e_0/saxihp0_fpd_aclk]
@@ -97,7 +116,7 @@ foreach port $ports {
                               CONFIG.gtlocation $gt_loc \
                               CONFIG.SupportLevel {1} \
                               ] [get_bd_cells axi_ethernet_$port]
-    connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk1] [get_bd_pins axi_ethernet_$port/ref_clk]
+    connect_bd_net [get_bd_pins $ref_clk] [get_bd_pins axi_ethernet_$port/ref_clk]
     # GT ref clock
     create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 gt_ref_clk
     set_property CONFIG.FREQ_HZ 125000000 [get_bd_intf_ports /gt_ref_clk]
@@ -111,7 +130,7 @@ foreach port $ports {
                               CONFIG.gtlocation $gt_loc \
                               CONFIG.SupportLevel {0} \
                               ] [get_bd_cells axi_ethernet_$port]
-    connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk1] [get_bd_pins axi_ethernet_$port/ref_clk]
+    connect_bd_net [get_bd_pins $ref_clk] [get_bd_pins axi_ethernet_$port/ref_clk]
     # Shared clocks
     connect_bd_net [get_bd_pins axi_ethernet_$port_with_shared_logic/gtref_clk_out] [get_bd_pins axi_ethernet_$port/gtref_clk]
     connect_bd_net [get_bd_pins axi_ethernet_$port_with_shared_logic/rxuserclk_out] [get_bd_pins axi_ethernet_$port/rxuserclk]
@@ -166,7 +185,7 @@ foreach port $ports {
   apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master "/axi_ethernet_${port}_dma/M_AXI_S2MM" Slave {/zynq_ultra_ps_e_0/S_AXI_HP0_FPD} ddr_seg {Auto} intc_ip {/axi_smc} master_apm {0}}  [get_bd_intf_pins axi_ethernet_${port}_dma/M_AXI_S2MM]
   apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master "/axi_ethernet_${port}_dma/M_AXI_SG" Slave {/zynq_ultra_ps_e_0/S_AXI_HP0_FPD} ddr_seg {Auto} intc_ip {/axi_smc} master_apm {0}}  [get_bd_intf_pins axi_ethernet_${port}_dma/M_AXI_SG]
 
-  # Make AXI Ethernet ports external: MDIO, RGMII and RESET
+  # Make AXI Ethernet ports external: SGMII and RESET
   # SGMII
   create_bd_intf_port -mode Master -vlnv xilinx.com:interface:sgmii_rtl:1.0 sgmii_port_${port}
   connect_bd_intf_net [get_bd_intf_pins axi_ethernet_${port}/sgmii] [get_bd_intf_ports sgmii_port_${port}]

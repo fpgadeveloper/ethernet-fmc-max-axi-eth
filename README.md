@@ -44,7 +44,7 @@ require a license to generate a bitstream with the AMD Xilinx tools.
 | Target board        | Target design     | Ports   | FMC Slot    | License<br> required | Verified |
 |---------------------|-------------------|---------|-------------|----------------------|---------|
 | [KCU105]            | `kcu105_hpc`      | 4x      | HPC         | YES | :x: |
-| [UltraZed-EV carrier] | `uzev`          | 4x      | HPC         | NO  | :x: |
+| [UltraZed-EV carrier] | `uzev`          | 4x      | HPC         | NO  | :white_check_mark: |
 | [VCK190]            | `vck190_fmcp1`    | 4x      | FMCP1       | YES | :x: |
 | [VCK190]            | `vck190_fmcp2`    | 4x      | FMCP2       | YES | :x: |
 | [VEK280]            | `vek280`          | 4x      | FMCP        | YES | :x: |
@@ -52,13 +52,13 @@ require a license to generate a bitstream with the AMD Xilinx tools.
 | [VMK180]            | `vmk180_fmcp2`    | 4x      | FMCP2       | YES | :x: |
 | [VPK120]            | `vpk120`          | 4x      | FMCP        | YES | :x: |
 | [VCU118]            | `vcu118_fmcp`     | 4x      | FMCP        | YES | :x: |
-| [ZCU102]            | `zcu102_hpc0`     | 4x      | HPC0        | YES | :heavy_check_mark: |
-| [ZCU102]            | `zcu102_hpc1`     | 4x      | HPC1        | YES | :heavy_check_mark: |
+| [ZCU102]            | `zcu102_hpc0`     | 4x      | HPC0        | YES | :white_check_mark: |
+| [ZCU102]            | `zcu102_hpc1`     | 4x      | HPC1        | YES | :white_check_mark: |
 | [ZCU104]            | `zcu104`          | 1x      | LPC         | NO  | :x: |
-| [ZCU106]            | `zcu106_hpc0`     | 4x      | HPC0        | NO  | :heavy_check_mark: |
-| [ZCU111]            | `zcu111`          | 4x      | FMCP        | YES | :heavy_check_mark: |
-| [ZCU208]            | `zcu208`          | 4x      | FMCP        | YES | :heavy_check_mark: |
-| [ZCU216]            | `zcu216`          | 4x      | FMCP        | YES | :heavy_check_mark: |
+| [ZCU106]            | `zcu106_hpc0`     | 4x      | HPC0        | NO  | :white_check_mark: |
+| [ZCU111]            | `zcu111`          | 4x      | FMCP        | YES | :white_check_mark: |
+| [ZCU208]            | `zcu208`          | 4x      | FMCP        | YES | :white_check_mark: |
+| [ZCU216]            | `zcu216`          | 4x      | FMCP        | YES | :white_check_mark: |
 
 ## Build instructions
 
