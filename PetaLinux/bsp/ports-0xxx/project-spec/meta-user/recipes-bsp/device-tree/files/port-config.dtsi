@@ -1,0 +1,20 @@
+
+    &axi_ethernet_0 {  
+    	/delete-property/ xlnx,phy-type;
+        local-mac-address = [00 0a 35 00 01 22];  
+        phy-handle = <&extphy0>;
+        xlnx,has-mdio = <0x1>;  
+        phy-mode = "sgmii";  
+        mdio {  
+            #address-cells = <1>;  
+            #size-cells = <0>;  
+            extphy0: phy@1 {  
+                device_type = "ethernet-phy";  
+                reg = <1>;
+                xlnx,phy-type = <0x4>;
+                ti,fifo-depth = <0x1>;                
+                enet-phy-lane-swap;
+            };  
+        };  
+    };  
+      

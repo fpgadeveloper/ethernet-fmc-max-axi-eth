@@ -43,6 +43,9 @@ set oldCurInst [current_bd_instance .]
 # Set parent object as current
 current_bd_instance $parentObj
 
+# SGMII PHY addresses
+set sgmii_phy_addr {2 4 13 14}
+
 # Add the Processor System and apply board preset
 create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e zynq_ultra_ps_e_0
 apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_board_preset "1" }  [get_bd_cells zynq_ultra_ps_e_0]
@@ -84,9 +87,12 @@ foreach port $ports {
   # Get the GT location
   set gt_loc [dict get $gt_loc_dict $target $port]
 
+  # Get the SGMII PHY address
+  set phy_addr [lindex $sgmii_phy_addr $port]
+
   # Configure the AXI Ethernet IP
   if {$port == $port_with_shared_logic} {
-    set_property -dict [list CONFIG.PHYADDR {2} \
+    set_property -dict [list CONFIG.PHYADDR $phy_addr \
                               CONFIG.PHY_TYPE {SGMII} \
                               CONFIG.gtlocation $gt_loc \
                               CONFIG.SupportLevel {1} \
@@ -100,7 +106,7 @@ foreach port $ports {
     create_bd_intf_port -mode Master -vlnv xilinx.com:interface:mdio_rtl:1.0 mdio_io
     connect_bd_intf_net [get_bd_intf_pins axi_ethernet_${port}/mdio] [get_bd_intf_ports mdio_io]
   } else {
-    set_property -dict [list CONFIG.PHYADDR {2} \
+    set_property -dict [list CONFIG.PHYADDR $phy_addr \
                               CONFIG.PHY_TYPE {SGMII} \
                               CONFIG.gtlocation $gt_loc \
                               CONFIG.SupportLevel {0} \
@@ -172,6 +178,13 @@ foreach port $ports {
   include_bd_addr_seg [get_bd_addr_segs -excluded axi_ethernet_${port}_dma/Data_SG/SEG_zynq_ultra_ps_e_0_HP0_LPS_OCM]
   include_bd_addr_seg [get_bd_addr_segs -excluded axi_ethernet_${port}_dma/Data_MM2S/SEG_zynq_ultra_ps_e_0_HP0_LPS_OCM]
   include_bd_addr_seg [get_bd_addr_segs -excluded axi_ethernet_${port}_dma/Data_S2MM/SEG_zynq_ultra_ps_e_0_HP0_LPS_OCM]
+}
+
+# signal_detect tied HIGH
+create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant const_signal_detect
+set_property CONFIG.CONST_VAL {1} [get_bd_cells const_signal_detect]
+foreach port $ports {
+  connect_bd_net [get_bd_pins const_signal_detect/dout] [get_bd_pins axi_ethernet_${port}/signal_detect]
 }
 
 # Connect AXI DMA and AXI Ethernet interrupts

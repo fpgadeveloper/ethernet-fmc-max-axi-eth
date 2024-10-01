@@ -12,25 +12,29 @@
                 device_type = "ethernet-phy";  
                 reg = <1>;
                 xlnx,phy-type = <0x4>;
-                ti,fifo-depth = <0x1>;                
+                ti,fifo-depth = <0x1>;    
+                enet-phy-lane-swap;
             };  
             extphy1: phy@3 {  
                 device_type = "ethernet-phy";  
                 reg = <3>;
                 xlnx,phy-type = <0x4>;
                 ti,fifo-depth = <0x1>;                
+                enet-phy-lane-swap;
             };  
             extphy2: phy@12 {  
                 device_type = "ethernet-phy";  
                 reg = <12>;
                 xlnx,phy-type = <0x4>;
                 ti,fifo-depth = <0x1>;                
+                enet-phy-lane-swap;
             };  
             extphy3: phy@15 {  
                 device_type = "ethernet-phy";  
                 reg = <15>;
                 xlnx,phy-type = <0x4>;
                 ti,fifo-depth = <0x1>;                
+                enet-phy-lane-swap;
             };  
         };  
     };  
