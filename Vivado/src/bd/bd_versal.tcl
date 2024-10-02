@@ -37,15 +37,24 @@ set oldCurInst [current_bd_instance .]
 # Set parent object as current
 current_bd_instance $parentObj
 
-set target "vek280"
-set board_name "vek280"
-set ports {0 1 2 3}
+# Returns true if str contains substr
+proc str_contains {str substr} {
+  if {[string first $substr $str] == -1} {
+    return 0
+  } else {
+    return 1
+  }
+}
+
+#set target "vek280"
+#set board_name "vek280"
+#set ports {0 1 2 3}
 
 # Target board checks
-set is_vck190 [expr {$board_name == "vck190"}]
-set is_vmk180 [expr {$board_name == "vmk180"}]
-set is_vek280 [expr {$board_name == "vek280"}]
-set is_vpk120 [expr {$board_name == "vpk120"}]
+set is_vck190 [str_contains $board_name "vck190"]
+set is_vmk180 [str_contains $board_name "vmk180"]
+set is_vek280 [str_contains $board_name "vek280"]
+set is_vpk120 [str_contains $board_name "vpk120"]
 
 # SGMII PHY addresses
 set sgmii_phy_addr {2 4 13 14}
@@ -166,9 +175,32 @@ set ref_clk "versal_cips_0/pl1_ref_clk"
 # System clock
 set sys_clk "versal_cips_0/pl0_ref_clk"
 
+# Add system clock and 4x3 input ports for the AXI DMAs to the NOC MC
+set_property -dict [list CONFIG.NUM_CLKS {7} CONFIG.NUM_SI {18}] [get_bd_cells axi_noc_0]
+set_property -dict [list CONFIG.CONNECTIONS {MC_3 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S00_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_2 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S01_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_0 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S02_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_1 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S03_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_3 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S04_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_2 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S05_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_0 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S06_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_0 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S07_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_0 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S08_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_1 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S09_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_1 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S10_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_1 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S11_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_2 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S12_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_2 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S13_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_2 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S14_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_3 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S15_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_3 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S16_AXI]
+set_property -dict [list CONFIG.CONNECTIONS {MC_3 {read_bw {500} write_bw {500} read_avg_burst {4} write_avg_burst {4}}}] [get_bd_intf_pins /axi_noc_0/S17_AXI]
+connect_bd_net [get_bd_pins $sys_clk] [get_bd_pins axi_noc_0/aclk6]
+set noc_port_index 6
+
 # Connect the AXI interface clocks
-connect_bd_net [get_bd_pins versal_cips_0/pl0_ref_clk] [get_bd_pins versal_cips_0/m_axi_lpd_aclk]
-connect_bd_net [get_bd_pins versal_cips_0/pl0_ref_clk] [get_bd_pins versal_cips_0/s_axi_fpd_aclk]
+connect_bd_net [get_bd_pins $sys_clk] [get_bd_pins versal_cips_0/m_axi_lpd_aclk]
+connect_bd_net [get_bd_pins $sys_clk] [get_bd_pins versal_cips_0/s_axi_fpd_aclk]
 
 # Proc system reset for main clock
 create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset rst_pl0
@@ -177,6 +209,7 @@ connect_bd_net [get_bd_pins versal_cips_0/pl0_resetn] [get_bd_pins rst_pl0/ext_r
 
 # AXI SmartConnect for AXI Lite interfaces
 create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect axi_smc
+set_property CONFIG.NUM_MI {2} [get_bd_cells axi_smc]
 connect_bd_net [get_bd_pins $sys_clk] [get_bd_pins axi_smc/aclk]
 connect_bd_net [get_bd_pins rst_pl0/peripheral_aresetn] [get_bd_pins axi_smc/aresetn]
 connect_bd_intf_net [get_bd_intf_pins versal_cips_0/M_AXI_LPD] [get_bd_intf_pins axi_smc/S00_AXI]
@@ -188,53 +221,48 @@ create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf util_ds_buf_0
 set_property CONFIG.C_BUF_TYPE {IBUFDSGTE} [get_bd_cells util_ds_buf_0]
 connect_bd_intf_net [get_bd_intf_ports gt_ref_clk] [get_bd_intf_pins util_ds_buf_0/CLK_IN_D]
 
-# Utility buffer to source abp3clk
-create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf bufg_gt_sysclk
-set_property CONFIG.C_BUF_TYPE {BUFG_GT} [get_bd_cells bufg_gt_sysclk]
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant const_1b1
-set_property -dict [list CONFIG.CONST_VAL {1} CONFIG.CONST_WIDTH {1}] [get_bd_cells const_1b1]
-connect_bd_net [get_bd_pins util_ds_buf_0/IBUF_DS_ODIV2] [get_bd_pins bufg_gt_sysclk/BUFG_GT_I]
-connect_bd_net [get_bd_pins const_1b1/dout] [get_bd_pins bufg_gt_sysclk/BUFG_GT_CE]
-
 # GT Quad base (Transceiver wizard)
 create_bd_cell -type ip -vlnv xilinx.com:ip:gt_quad_base gt_quad_base_0
 connect_bd_net [get_bd_pins util_ds_buf_0/IBUF_OUT] [get_bd_pins gt_quad_base_0/GT_REFCLK0]
-connect_bd_net [get_bd_pins bufg_gt_sysclk/BUFG_GT_O] [get_bd_pins gt_quad_base_0/apb3clk]
+connect_bd_net [get_bd_pins $sys_clk] [get_bd_pins gt_quad_base_0/apb3clk]
+connect_bd_net [get_bd_pins rst_pl0/peripheral_aresetn] [get_bd_pins gt_quad_base_0/apb3presetn]
+
+# APB Bridge
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_apb_bridge axi_apb_bridge_0
+set_property CONFIG.C_APB_NUM_SLAVES {1} [get_bd_cells axi_apb_bridge_0]
+connect_bd_intf_net [get_bd_intf_pins axi_apb_bridge_0/APB_M] [get_bd_intf_pins gt_quad_base_0/APB3_INTF]
+connect_bd_net [get_bd_pins $sys_clk] [get_bd_pins axi_apb_bridge_0/s_axi_aclk]
+connect_bd_net [get_bd_pins rst_pl0/peripheral_aresetn] [get_bd_pins axi_apb_bridge_0/s_axi_aresetn]
+connect_bd_intf_net [get_bd_intf_pins axi_smc/M00_AXI] [get_bd_intf_pins axi_apb_bridge_0/AXI4_LITE]
+
+# Timer
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_timer axi_timer_0
+connect_bd_net [get_bd_pins $sys_clk] [get_bd_pins axi_timer_0/s_axi_aclk]
+connect_bd_net [get_bd_pins rst_pl0/peripheral_aresetn] [get_bd_pins axi_timer_0/s_axi_aresetn]
+connect_bd_intf_net [get_bd_intf_pins axi_smc/M01_AXI] [get_bd_intf_pins axi_timer_0/S_AXI]
+lappend intr_list "axi_timer_0/interrupt"
 
 # SGMII (GT) interface
 create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gt_rtl:1.0 sgmii_port
 connect_bd_intf_net [get_bd_intf_pins gt_quad_base_0/GT_Serial] [get_bd_intf_ports sgmii_port]
 
-# Create the AXI SmartConnect for the DMA connections
-set axi_smc_dma_ports [expr {$num_ports * 3}]
-create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect axi_smc_dma
-set_property CONFIG.NUM_SI $axi_smc_dma_ports [get_bd_cells axi_smc_dma]
-connect_bd_intf_net [get_bd_intf_pins axi_smc_dma/M00_AXI] [get_bd_intf_pins versal_cips_0/S_AXI_FPD]
-connect_bd_net [get_bd_pins $sys_clk] [get_bd_pins axi_smc_dma/aclk]
-connect_bd_net [get_bd_pins rst_pl0/peripheral_aresetn] [get_bd_pins axi_smc_dma/aresetn]
-
 # Add and configure AXI Ethernet IPs with AXI DMAs
-set axi_smc_dma_index 0
 foreach port $ports {
   # BUFG GTs
   # rxuserclk
-  create_bd_cell -type ip -vlnv xilinx.com:ip:bufg_gt bufg_gt_a_${port}
-  set_property CONFIG.FREQ_HZ {62500000} [get_bd_cells bufg_gt_a_${port}]
-  connect_bd_net [get_bd_pins bufg_gt_a_${port}/usrclk] [get_bd_pins gt_quad_base_0/ch${port}_rxusrclk]
-  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxoutclk] [get_bd_pins bufg_gt_a_${port}/outclk]
+  create_bd_cell -type ip -vlnv xilinx.com:ip:bufg_gt bufg_gt_rxoutclk_${port}
+  set_property CONFIG.FREQ_HZ {62500000} [get_bd_cells bufg_gt_rxoutclk_${port}]
+  connect_bd_net [get_bd_pins bufg_gt_rxoutclk_${port}/usrclk] [get_bd_pins gt_quad_base_0/ch${port}_rxusrclk]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxoutclk] [get_bd_pins bufg_gt_rxoutclk_${port}/outclk]
   # userclk
-  create_bd_cell -type ip -vlnv xilinx.com:ip:bufg_gt bufg_gt_b_${port}
-  set_property CONFIG.FREQ_HZ {62500000} [get_bd_cells bufg_gt_b_${port}]
-  connect_bd_net [get_bd_pins bufg_gt_b_${port}/usrclk] [get_bd_pins gt_quad_base_0/ch${port}_txusrclk]
-  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_txoutclk] [get_bd_pins bufg_gt_b_${port}/outclk]
+  create_bd_cell -type ip -vlnv xilinx.com:ip:bufg_gt bufg_gt_txoutclk_div2_${port}
+  set_property CONFIG.FREQ_HZ {62500000} [get_bd_cells bufg_gt_txoutclk_div2_${port}]
+  connect_bd_net [get_bd_pins bufg_gt_txoutclk_div2_${port}/usrclk] [get_bd_pins gt_quad_base_0/ch${port}_txusrclk]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_txoutclk] [get_bd_pins bufg_gt_txoutclk_div2_${port}/outclk]
   # userclk2
-  create_bd_cell -type ip -vlnv xilinx.com:ip:bufg_gt bufg_gt_c_${port}
-  set_property CONFIG.FREQ_HZ {125000000} [get_bd_cells bufg_gt_c_${port}]
-  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_txoutclk] [get_bd_pins bufg_gt_c_${port}/outclk]
-  # rxuserclk2
-  create_bd_cell -type ip -vlnv xilinx.com:ip:bufg_gt bufg_gt_d_${port}
-  set_property CONFIG.FREQ_HZ {62500000} [get_bd_cells bufg_gt_d_${port}]
-  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxoutclk] [get_bd_pins bufg_gt_d_${port}/outclk]
+  create_bd_cell -type ip -vlnv xilinx.com:ip:bufg_gt bufg_gt_txoutclk_${port}
+  set_property CONFIG.FREQ_HZ {125000000} [get_bd_cells bufg_gt_txoutclk_${port}]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_txoutclk] [get_bd_pins bufg_gt_txoutclk_${port}/outclk]
 
   # Add the AXI Ethernet IPs
   create_bd_cell -type ip -vlnv xilinx.com:ip:axi_ethernet axi_ethernet_$port
@@ -259,13 +287,16 @@ foreach port $ports {
 
   # AXI Eth Interrupts
   lappend intr_list "axi_ethernet_${port}/interrupt"
-  lappend intr_list "axi_ethernet_${port}/mac_irq"
+  #lappend intr_list "axi_ethernet_${port}/mac_irq"
   
   # Connect clocks
-  connect_bd_net [get_bd_pins bufg_gt_a_${port}/usrclk] [get_bd_pins axi_ethernet_${port}/rxuserclk]
-  connect_bd_net [get_bd_pins bufg_gt_b_${port}/usrclk] [get_bd_pins axi_ethernet_${port}/userclk]
-  connect_bd_net [get_bd_pins bufg_gt_c_${port}/usrclk] [get_bd_pins axi_ethernet_${port}/userclk2]
-  connect_bd_net [get_bd_pins bufg_gt_d_${port}/usrclk] [get_bd_pins axi_ethernet_${port}/rxuserclk2]
+  connect_bd_net [get_bd_pins bufg_gt_rxoutclk_${port}/usrclk] [get_bd_pins axi_ethernet_${port}/rxuserclk]
+  connect_bd_net [get_bd_pins bufg_gt_rxoutclk_${port}/usrclk] [get_bd_pins axi_ethernet_${port}/rxuserclk2]
+  connect_bd_net [get_bd_pins bufg_gt_txoutclk_div2_${port}/usrclk] [get_bd_pins axi_ethernet_${port}/userclk]
+  connect_bd_net [get_bd_pins bufg_gt_txoutclk_${port}/usrclk] [get_bd_pins axi_ethernet_${port}/userclk2]
+
+  # Resets
+  connect_bd_net [get_bd_pins rst_pl0/peripheral_reset] [get_bd_pins axi_ethernet_${port}/pma_reset]
 
   # Connect Quad to AXI Eth
   connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxprogdivresetdone] [get_bd_pins axi_ethernet_${port}/gtwiz_reset_rx_done_in]
@@ -273,12 +304,17 @@ foreach port $ports {
   connect_bd_net [get_bd_pins gt_quad_base_0/gtpowergood] [get_bd_pins axi_ethernet_${port}/gtpowergood_in]
   connect_bd_intf_net [get_bd_intf_pins gt_quad_base_0/RX${port}_GT_IP_Interface] [get_bd_intf_pins axi_ethernet_${port}/gt_rx_interface]
   connect_bd_intf_net [get_bd_intf_pins gt_quad_base_0/TX${port}_GT_IP_Interface] [get_bd_intf_pins axi_ethernet_${port}/gt_tx_interface]
+  connect_bd_net [get_bd_pins gt_quad_base_0/hsclk0_lcplllock] [get_bd_pins axi_ethernet_${port}/cplllock_in]
 
   # Add the DMA for the AXI Ethernet Subsystem
   create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dma axi_ethernet_${port}_dma
   
   # Must enable unaligned transfers in the DMAs or we get this error in Echo server: "Error set buf addr 201116 with 4 and 3, 2"
-  set_property -dict [list CONFIG.c_include_mm2s_dre {1} CONFIG.c_include_s2mm_dre {1}] [get_bd_cells axi_ethernet_${port}_dma]
+  set_property -dict [list CONFIG.c_include_mm2s_dre {1} \
+                            CONFIG.c_include_s2mm_dre {1} \
+                            CONFIG.c_sg_length_width {16} \
+                            CONFIG.c_sg_use_stsapp_length {1} \
+                            ] [get_bd_cells axi_ethernet_${port}_dma]
   
   # Connect AXI streaming interfaces
   connect_bd_intf_net [get_bd_intf_pins axi_ethernet_${port}/m_axis_rxd] [get_bd_intf_pins axi_ethernet_${port}_dma/S_AXIS_S2MM]
@@ -311,15 +347,15 @@ foreach port $ports {
   apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master {/versal_cips_0/M_AXI_LPD} Slave "/axi_ethernet_${port}_dma/S_AXI_LITE" ddr_seg {Auto} intc_ip {Auto} master_apm {0}}  [get_bd_intf_pins axi_ethernet_${port}_dma/S_AXI_LITE]
   
   # Connect the DMA AXI interfaces
-  set index_padded [format "%02d" $axi_smc_dma_index]
-  connect_bd_intf_net [get_bd_intf_pins axi_ethernet_${port}_dma/M_AXI_SG] [get_bd_intf_pins axi_smc_dma/S${index_padded}_AXI]
-  set axi_smc_dma_index [expr {$axi_smc_dma_index + 1}]
-  set index_padded [format "%02d" $axi_smc_dma_index]
-  connect_bd_intf_net [get_bd_intf_pins axi_ethernet_${port}_dma/M_AXI_MM2S] [get_bd_intf_pins axi_smc_dma/S${index_padded}_AXI]
-  set axi_smc_dma_index [expr {$axi_smc_dma_index + 1}]
-  set index_padded [format "%02d" $axi_smc_dma_index]
-  connect_bd_intf_net [get_bd_intf_pins axi_ethernet_${port}_dma/M_AXI_S2MM] [get_bd_intf_pins axi_smc_dma/S${index_padded}_AXI]
-  set axi_smc_dma_index [expr {$axi_smc_dma_index + 1}]
+  set index_padded [format "%02d" $noc_port_index]
+  connect_bd_intf_net [get_bd_intf_pins axi_ethernet_${port}_dma/M_AXI_SG] [get_bd_intf_pins axi_noc_0/S${index_padded}_AXI]
+  set noc_port_index [expr {$noc_port_index + 1}]
+  set index_padded [format "%02d" $noc_port_index]
+  connect_bd_intf_net [get_bd_intf_pins axi_ethernet_${port}_dma/M_AXI_MM2S] [get_bd_intf_pins axi_noc_0/S${index_padded}_AXI]
+  set noc_port_index [expr {$noc_port_index + 1}]
+  set index_padded [format "%02d" $noc_port_index]
+  connect_bd_intf_net [get_bd_intf_pins axi_ethernet_${port}_dma/M_AXI_S2MM] [get_bd_intf_pins axi_noc_0/S${index_padded}_AXI]
+  set noc_port_index [expr {$noc_port_index + 1}]
 
   # External PHY RESET
   create_bd_port -dir O -type rst reset_port_${port}
@@ -334,8 +370,8 @@ set_property -dict [list CONFIG.CONST_VAL {1} CONFIG.CONST_WIDTH {1}] [get_bd_ce
 create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant xlconstant_1
 set_property -dict [list CONFIG.CONST_VAL {0} CONFIG.CONST_WIDTH {1}] [get_bd_cells xlconstant_1]
 foreach port $ports {
-  connect_bd_net [get_bd_pins xlconstant/dout] [get_bd_pins bufg_gt_b_${port}/gt_bufgtdiv]
-  foreach i {"a" "b" "c" "d"} {
+  connect_bd_net [get_bd_pins xlconstant/dout] [get_bd_pins bufg_gt_txoutclk_div2_${port}/gt_bufgtdiv]
+  foreach i {"rxoutclk" "txoutclk_div2" "txoutclk"} {
     connect_bd_net [get_bd_pins xlconstant_0/dout] [get_bd_pins bufg_gt_${i}_${port}/gt_bufgtce]
     connect_bd_net [get_bd_pins xlconstant_0/dout] [get_bd_pins bufg_gt_${i}_${port}/gt_bufgtcemask]
     connect_bd_net [get_bd_pins xlconstant_0/dout] [get_bd_pins bufg_gt_${i}_${port}/gt_bufgtclrmask]
@@ -343,11 +379,209 @@ foreach port $ports {
   }
 }
 
-# signal_detect tied HIGH
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant const_signal_detect
-set_property CONFIG.CONST_VAL {1} [get_bd_cells const_signal_detect]
+# Configure the GT quad protocols
+set_property -dict [list \
+  CONFIG.PROT1_ENABLE.VALUE_MODE MANUAL \
+  CONFIG.PROT3_ENABLE.VALUE_MODE MANUAL \
+  CONFIG.PROT2_ENABLE.VALUE_MODE MANUAL \
+  CONFIG.PROT0_NO_OF_LANES.VALUE_MODE MANUAL \
+  ] [get_bd_cells gt_quad_base_0]
+set_property -dict [list \
+  CONFIG.PROT0_NO_OF_LANES {1} \
+  CONFIG.PROT1_ENABLE {true} \
+  CONFIG.PROT2_ENABLE {true} \
+  CONFIG.PROT3_ENABLE {true} \
+] [get_bd_cells gt_quad_base_0]
+set_property -dict [list \
+  CONFIG.PROT0_LR0_SETTINGS.VALUE_MODE MANUAL \
+  CONFIG.PROT1_LR0_SETTINGS.VALUE_MODE MANUAL \
+  CONFIG.PROT2_LR0_SETTINGS.VALUE_MODE MANUAL \
+  CONFIG.PROT3_LR0_SETTINGS.VALUE_MODE MANUAL \
+  ] [get_bd_cells gt_quad_base_0]
+set protocol [list \
+  PRESET GTYP-Ethernet_1G \
+  RX_PAM_SEL NRZ \
+  TX_PAM_SEL NRZ \
+  TX_HD_EN 0 \
+  RX_HD_EN 0 \
+  RX_GRAY_BYP true \
+  TX_GRAY_BYP true \
+  RX_GRAY_LITTLEENDIAN true \
+  TX_GRAY_LITTLEENDIAN true \
+  RX_PRECODE_BYP true \
+  TX_PRECODE_BYP true \
+  RX_PRECODE_LITTLEENDIAN false \
+  TX_PRECODE_LITTLEENDIAN false \
+  INTERNAL_PRESET Ethernet_1G \
+  GT_TYPE GTYP \
+  GT_DIRECTION DUPLEX \
+  TX_LINE_RATE 1.25 \
+  TX_PLL_TYPE RPLL \
+  TX_REFCLK_FREQUENCY 125 \
+  TX_ACTUAL_REFCLK_FREQUENCY 125.000000000000 \
+  TX_FRACN_ENABLED false \
+  TX_FRACN_OVRD false \
+  TX_FRACN_NUMERATOR 0 \
+  TX_REFCLK_SOURCE R1 \
+  TX_DATA_ENCODING 8B10B \
+  TX_USER_DATA_WIDTH 16 \
+  TX_INT_DATA_WIDTH 20 \
+  TX_BUFFER_MODE 1 \
+  TX_BUFFER_BYPASS_MODE Fast_Sync \
+  TX_PIPM_ENABLE false \
+  TX_OUTCLK_SOURCE TXPROGDIVCLK \
+  TXPROGDIV_FREQ_ENABLE true \
+  TXPROGDIV_FREQ_SOURCE RPLL \
+  TXPROGDIV_FREQ_VAL 125.000 \
+  TX_DIFF_SWING_EMPH_MODE CUSTOM \
+  TX_64B66B_SCRAMBLER false \
+  TX_64B66B_ENCODER false \
+  TX_64B66B_CRC false \
+  TX_RATE_GROUP A \
+  RX_LINE_RATE 1.25 \
+  RX_PLL_TYPE RPLL \
+  RX_REFCLK_FREQUENCY 125 \
+  RX_ACTUAL_REFCLK_FREQUENCY 125.000000000000 \
+  RX_FRACN_ENABLED false \
+  RX_FRACN_OVRD false \
+  RX_FRACN_NUMERATOR 0 \
+  RX_REFCLK_SOURCE R1 \
+  RX_DATA_DECODING 8B10B \
+  RX_USER_DATA_WIDTH 16 \
+  RX_INT_DATA_WIDTH 20 \
+  RX_BUFFER_MODE 1 \
+  RX_OUTCLK_SOURCE RXPROGDIVCLK \
+  RXPROGDIV_FREQ_ENABLE true \
+  RXPROGDIV_FREQ_SOURCE RPLL \
+  RXPROGDIV_FREQ_VAL 62.500 \
+  RXRECCLK_FREQ_ENABLE true \
+  RXRECCLK_FREQ_VAL 500.000 \
+  INS_LOSS_NYQ 14 \
+  RX_EQ_MODE LPM \
+  RX_COUPLING AC \
+  RX_TERMINATION PROGRAMMABLE \
+  RX_RATE_GROUP A \
+  RX_TERMINATION_PROG_VALUE 800 \
+  RX_PPM_OFFSET 200 \
+  RX_64B66B_DESCRAMBLER false \
+  RX_64B66B_DECODER false \
+  RX_64B66B_CRC false \
+  OOB_ENABLE false \
+  RX_COMMA_ALIGN_WORD 2 \
+  RX_COMMA_SHOW_REALIGN_ENABLE true \
+  PCIE_ENABLE false \
+  TX_LANE_DESKEW_HDMI_ENABLE false \
+  RX_COMMA_P_ENABLE true \
+  RX_COMMA_M_ENABLE true \
+  RX_COMMA_DOUBLE_ENABLE false \
+  RX_COMMA_P_VAL 0101111100 \
+  RX_COMMA_M_VAL 1010000011 \
+  RX_COMMA_MASK 1111111111 \
+  RX_SLIDE_MODE OFF \
+  RX_SSC_PPM 0 \
+  RX_CB_NUM_SEQ 0 \
+  RX_CB_LEN_SEQ 1 \
+  RX_CB_MAX_SKEW 1 \
+  RX_CB_MAX_LEVEL 1 \
+  RX_CB_MASK_0_0 false \
+  RX_CB_VAL_0_0 00000000 \
+  RX_CB_K_0_0 false \
+  RX_CB_DISP_0_0 false \
+  RX_CB_MASK_0_1 false \
+  RX_CB_VAL_0_1 00000000 \
+  RX_CB_K_0_1 false \
+  RX_CB_DISP_0_1 false \
+  RX_CB_MASK_0_2 false \
+  RX_CB_VAL_0_2 00000000 \
+  RX_CB_K_0_2 false \
+  RX_CB_DISP_0_2 false \
+  RX_CB_MASK_0_3 false \
+  RX_CB_VAL_0_3 00000000 \
+  RX_CB_K_0_3 false \
+  RX_CB_DISP_0_3 false \
+  RX_CB_MASK_1_0 false \
+  RX_CB_VAL_1_0 00000000 \
+  RX_CB_K_1_0 false \
+  RX_CB_DISP_1_0 false \
+  RX_CB_MASK_1_1 false \
+  RX_CB_VAL_1_1 00000000 \
+  RX_CB_K_1_1 false \
+  RX_CB_DISP_1_1 false \
+  RX_CB_MASK_1_2 false \
+  RX_CB_VAL_1_2 00000000 \
+  RX_CB_K_1_2 false \
+  RX_CB_DISP_1_2 false \
+  RX_CB_MASK_1_3 false \
+  RX_CB_VAL_1_3 00000000 \
+  RX_CB_K_1_3 false \
+  RX_CB_DISP_1_3 false \
+  RX_CC_NUM_SEQ 0 \
+  RX_CC_LEN_SEQ 1 \
+  RX_CC_PERIODICITY 5000 \
+  RX_CC_KEEP_IDLE DISABLE \
+  RX_CC_PRECEDENCE ENABLE \
+  RX_CC_REPEAT_WAIT 0 \
+  RX_CC_VAL 00000000000000000000000000000000000000000000000000000000000000000000000000000000 \
+  RX_CC_MASK_0_0 false \
+  RX_CC_VAL_0_0 00000000 \
+  RX_CC_K_0_0 false \
+  RX_CC_DISP_0_0 false \
+  RX_CC_MASK_0_1 false \
+  RX_CC_VAL_0_1 00000000 \
+  RX_CC_K_0_1 false \
+  RX_CC_DISP_0_1 false \
+  RX_CC_MASK_0_2 false \
+  RX_CC_VAL_0_2 00000000 \
+  RX_CC_K_0_2 false \
+  RX_CC_DISP_0_2 false \
+  RX_CC_MASK_0_3 false \
+  RX_CC_VAL_0_3 00000000 \
+  RX_CC_K_0_3 false \
+  RX_CC_DISP_0_3 false \
+  RX_CC_MASK_1_0 false \
+  RX_CC_VAL_1_0 00000000 \
+  RX_CC_K_1_0 false \
+  RX_CC_DISP_1_0 false \
+  RX_CC_MASK_1_1 false \
+  RX_CC_VAL_1_1 00000000 \
+  RX_CC_K_1_1 false \
+  RX_CC_DISP_1_1 false \
+  RX_CC_MASK_1_2 false \
+  RX_CC_VAL_1_2 00000000 \
+  RX_CC_K_1_2 false \
+  RX_CC_DISP_1_2 false \
+  RX_CC_MASK_1_3 false \
+  RX_CC_VAL_1_3 00000000 \
+  RX_CC_K_1_3 false \
+  RX_CC_DISP_1_3 false \
+  PCIE_USERCLK2_FREQ 250 \
+  PCIE_USERCLK_FREQ 250 \
+  RX_JTOL_FC 0.74985 \
+  RX_JTOL_LF_SLOPE -20 \
+  RX_BUFFER_BYPASS_MODE Fast_Sync \
+  RX_BUFFER_BYPASS_MODE_LANE MULTI \
+  RX_BUFFER_RESET_ON_CB_CHANGE ENABLE \
+  RX_BUFFER_RESET_ON_COMMAALIGN DISABLE \
+  RX_BUFFER_RESET_ON_RATE_CHANGE ENABLE \
+  TX_BUFFER_RESET_ON_RATE_CHANGE ENABLE \
+  RESET_SEQUENCE_INTERVAL 0 \
+  RX_COMMA_PRESET K28.5 \
+  RX_COMMA_VALID_ONLY 0]
+set_property -dict [list \
+  CONFIG.PROT0_LR0_SETTINGS $protocol \
+  CONFIG.PROT1_LR0_SETTINGS $protocol \
+  CONFIG.PROT2_LR0_SETTINGS $protocol \
+  CONFIG.PROT3_LR0_SETTINGS $protocol \
+] [get_bd_cells gt_quad_base_0]
+
+connect_bd_net [get_bd_pins util_ds_buf_0/IBUF_OUT] [get_bd_pins gt_quad_base_0/GT_REFCLK1]
+
+# signal_detect and MMCM locked tied HIGH
+create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant const_high
+set_property CONFIG.CONST_VAL {1} [get_bd_cells const_high]
 foreach port $ports {
-  connect_bd_net [get_bd_pins const_signal_detect/dout] [get_bd_pins axi_ethernet_${port}/signal_detect]
+  connect_bd_net [get_bd_pins const_high/dout] [get_bd_pins axi_ethernet_${port}/signal_detect]
+  connect_bd_net [get_bd_pins const_high/dout] [get_bd_pins axi_ethernet_${port}/mmcm_locked]
 }
 
 # Add the AXI GPIO for the power good and PHY GPIO signals
@@ -370,17 +604,5 @@ foreach intr $intr_list {
 # Assign any addresses that haven't already been assigned
 assign_bd_address
 
-# Validate the design but don't crash if there is an error
-set result [catch {validate_bd_design} error_message]
-
-# Check if an error occurred
-if {$result != 0} {
-    puts "Validation failed: $error_message"
-} else {
-    puts "Block diagram validated"
-}
-
-# This last clock can only be connected after verification of the design
-connect_bd_net [get_bd_pins util_ds_buf_0/IBUF_OUT] [get_bd_pins gt_quad_base_0/GT_REFCLK1]
-
+validate_bd_design
 save_bd_design

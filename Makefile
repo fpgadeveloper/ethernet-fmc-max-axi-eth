@@ -17,6 +17,7 @@ uzev_target := zynqMP both
 vck190_fmcp1_target := versal both
 vck190_fmcp2_target := versal both
 vek280_target := versal both
+vek280_es_revb_target := versal both
 vmk180_fmcp1_target := versal both
 vmk180_fmcp2_target := versal both
 vpk120_target := versal both

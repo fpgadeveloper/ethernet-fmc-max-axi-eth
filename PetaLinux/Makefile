@@ -17,6 +17,7 @@ uzev_target := zynqMP 0 0 ports-0123
 vck190_fmcp1_target := versal 0 0 ports-0123
 vck190_fmcp2_target := versal 0 0 ports-0123
 vek280_target := versal 0 0 ports-0123
+vek280_es_revb_target := versal 0 0 ports-0123
 vmk180_fmcp1_target := versal 0 0 ports-0123
 vmk180_fmcp2_target := versal 0 0 ports-0123
 vpk120_target := versal 0 0 ports-0123

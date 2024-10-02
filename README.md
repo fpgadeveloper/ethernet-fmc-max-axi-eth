@@ -47,7 +47,8 @@ require a license to generate a bitstream with the AMD Xilinx tools.
 | [UltraZed-EV carrier] | `uzev`          | 4x      | HPC         | NO  | :white_check_mark: |
 | [VCK190]            | `vck190_fmcp1`    | 4x      | FMCP1       | YES | :x: |
 | [VCK190]            | `vck190_fmcp2`    | 4x      | FMCP2       | YES | :x: |
-| [VEK280]            | `vek280`          | 4x      | FMCP        | YES | :x: |
+| [VEK280]            | `vek280`          | 4x      | FMCP        | YES | :white_check_mark: |
+| [VEK280] ES Rev-B   | `vek280_es_revb`  | 4x      | FMCP        | YES | :white_check_mark: |
 | [VMK180]            | `vmk180_fmcp1`    | 4x      | FMCP1       | YES | :x: |
 | [VMK180]            | `vmk180_fmcp2`    | 4x      | FMCP2       | YES | :x: |
 | [VPK120]            | `vpk120`          | 4x      | FMCP        | YES | :x: |
