@@ -1,13 +1,10 @@
-# AXI Ethernet Reference Designs for Ethernet FMC Max
-
-## UNDER DEVELOPMENT
-
-This project is currently under active development and may undergo significant changes.
+# AXI 1G Ethernet Reference Designs for Ethernet FMC Max
 
 ## Description
 
 This project demonstrates the use of the Opsero [Ethernet FMC Max] and it supports
-several FPGA/MPSoC development boards. The design contains 4 AXI Ethernet blocks configured with DMAs.
+several development boards for UltraScale FPGA, Zynq UltraScale+ and Versal ACAP. 
+The design contains 4 AXI 1G Ethernet Subsystem blocks configured with DMAs.
 
 ![Application example](docs/source/images/ethernet-fmc-max-with-vek280.jpg "Ethernet FMC Max with VEK280")
 
@@ -45,13 +42,13 @@ require a license to generate a bitstream with the AMD Xilinx tools.
 |---------------------|-------------------|---------|-------------|----------------------|---------|
 | [KCU105]            | `kcu105_hpc`      | 4x      | HPC         | YES | :x: |
 | [UltraZed-EV carrier] | `uzev`          | 4x      | HPC         | NO  | :white_check_mark: |
-| [VCK190]            | `vck190_fmcp1`    | 4x      | FMCP1       | YES | :x: |
-| [VCK190]            | `vck190_fmcp2`    | 4x      | FMCP2       | YES | :x: |
+| [VCK190]            | `vck190_fmcp1`    | 4x      | FMCP1       | YES | :white_check_mark: |
+| [VCK190]            | `vck190_fmcp2`    | 4x      | FMCP2       | YES | :white_check_mark: |
 | [VEK280]            | `vek280`          | 4x      | FMCP        | YES | :white_check_mark: |
 | [VEK280] ES Rev-B   | `vek280_es_revb`  | 4x      | FMCP        | YES | :white_check_mark: |
-| [VMK180]            | `vmk180_fmcp1`    | 4x      | FMCP1       | YES | :x: |
-| [VMK180]            | `vmk180_fmcp2`    | 4x      | FMCP2       | YES | :x: |
-| [VPK120]            | `vpk120`          | 4x      | FMCP        | YES | :x: |
+| [VMK180]            | `vmk180_fmcp1`    | 4x      | FMCP1       | YES | :white_check_mark: |
+| [VMK180]            | `vmk180_fmcp2`    | 4x      | FMCP2       | YES | :white_check_mark: |
+| [VPK120]            | `vpk120`          | 4x      | FMCP        | YES | :white_check_mark: |
 | [VCU118]            | `vcu118_fmcp`     | 4x      | FMCP        | YES | :x: |
 | [ZCU102]            | `zcu102_hpc0`     | 4x      | HPC0        | YES | :white_check_mark: |
 | [ZCU102]            | `zcu102_hpc1`     | 4x      | HPC1        | YES | :white_check_mark: |
