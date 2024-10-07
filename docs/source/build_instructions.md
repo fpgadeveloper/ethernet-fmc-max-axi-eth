@@ -95,24 +95,7 @@ to build the Vivado and PetaLinux projects with a single command.
    ```
    make project TARGET=<target>
    ```
-   Valid targets are: 
-   `kcu105_hpc`,
-   `uzev`,
-   `vck190_fmcp1`,
-   `vck190_fmcp2`,
-   `vek280`,
-   `vek280_es_revb`,
-   `vmk180_fmcp1`,
-   `vmk180_fmcp2`,
-   `vpk120`,
-   `vcu118_fmcp`,
-   `zcu102_hpc0`,
-   `zcu102_hpc1`,
-   `zcu104`,
-   `zcu106_hpc0`,
-   `zcu111`,
-   `zcu208`,
-   `zcu216`.
+   Valid target labels are listed in the table of target designs above.
    That will create the Vivado project and block design without generating a bitstream or exporting to XSA.
 4. Open the generated project in the Vivado GUI and click **Generate Bitstream**. Once the build is
    complete, select **File->Export->Export Hardware** and be sure to tick **Include bitstream** and use
@@ -143,24 +126,7 @@ design if it has not already been done.
    cd PetaLinux
    make petalinux TARGET=<target>
    ```
-   Valid targets are: 
-   `kcu105_hpc`,
-   `uzev`,
-   `vck190_fmcp1`,
-   `vck190_fmcp2`,
-   `vek280`,
-   `vek280_es_revb`,
-   `vmk180_fmcp1`,
-   `vmk180_fmcp2`,
-   `vpk120`,
-   `vcu118_fmcp`,
-   `zcu102_hpc0`,
-   `zcu102_hpc1`,
-   `zcu104`,
-   `zcu106_hpc0`,
-   `zcu111`,
-   `zcu208`,
-   `zcu216`.
+   Valid target labels are listed in the table of target designs above.
    Note that if you skipped the Vivado build steps above, the Makefile will first generate and
    build the Vivado project, and then build the PetaLinux project.
 

@@ -38,25 +38,23 @@ FMC connectors. The table below lists the target design name, the number of port
 the FMC connector on which to connect the Ethernet FMC Max. Some of the target designs
 require a license to generate a bitstream with the AMD Xilinx tools.
 
-| Target board        | Target design     | Ports   | FMC Slot    | License<br> required | Verified |
-|---------------------|-------------------|---------|-------------|----------------------|---------|
-| [KCU105]            | `kcu105_hpc`      | 4x      | HPC         | YES | :x: |
-| [UltraZed-EV carrier] | `uzev`          | 4x      | HPC         | NO  | :white_check_mark: |
-| [VCK190]            | `vck190_fmcp1`    | 4x      | FMCP1       | YES | :white_check_mark: |
-| [VCK190]            | `vck190_fmcp2`    | 4x      | FMCP2       | YES | :white_check_mark: |
-| [VEK280]            | `vek280`          | 4x      | FMCP        | YES | :white_check_mark: |
-| [VEK280] ES Rev-B   | `vek280_es_revb`  | 4x      | FMCP        | YES | :white_check_mark: |
-| [VMK180]            | `vmk180_fmcp1`    | 4x      | FMCP1       | YES | :white_check_mark: |
-| [VMK180]            | `vmk180_fmcp2`    | 4x      | FMCP2       | YES | :white_check_mark: |
-| [VPK120]            | `vpk120`          | 4x      | FMCP        | YES | :white_check_mark: |
-| [VCU118]            | `vcu118_fmcp`     | 4x      | FMCP        | YES | :x: |
-| [ZCU102]            | `zcu102_hpc0`     | 4x      | HPC0        | YES | :white_check_mark: |
-| [ZCU102]            | `zcu102_hpc1`     | 4x      | HPC1        | YES | :white_check_mark: |
-| [ZCU104]            | `zcu104`          | 1x      | LPC         | NO  | :x: |
-| [ZCU106]            | `zcu106_hpc0`     | 4x      | HPC0        | NO  | :white_check_mark: |
-| [ZCU111]            | `zcu111`          | 4x      | FMCP        | YES | :white_check_mark: |
-| [ZCU208]            | `zcu208`          | 4x      | FMCP        | YES | :white_check_mark: |
-| [ZCU216]            | `zcu216`          | 4x      | FMCP        | YES | :white_check_mark: |
+| Target board        | Target design     | Ports   | FMC Slot    | License<br> required |
+|---------------------|-------------------|---------|-------------|----------------------|
+| [UltraZed-EV carrier] | `uzev`          | 4x      | HPC         | NO  |
+| [VCK190]            | `vck190_fmcp1`    | 4x      | FMCP1       | YES |
+| [VCK190]            | `vck190_fmcp2`    | 4x      | FMCP2       | YES |
+| [VEK280]            | `vek280`          | 4x      | FMCP        | YES |
+| [VEK280] ES Rev-B   | `vek280_es_revb`  | 4x      | FMCP        | YES |
+| [VMK180]            | `vmk180_fmcp1`    | 4x      | FMCP1       | YES |
+| [VMK180]            | `vmk180_fmcp2`    | 4x      | FMCP2       | YES |
+| [VPK120]            | `vpk120`          | 4x      | FMCP        | YES |
+| [ZCU102]            | `zcu102_hpc0`     | 4x      | HPC0        | YES |
+| [ZCU102]            | `zcu102_hpc1`     | 4x      | HPC1        | YES |
+| [ZCU104]            | `zcu104`          | 1x      | LPC         | NO  |
+| [ZCU106]            | `zcu106_hpc0`     | 4x      | HPC0        | NO  |
+| [ZCU111]            | `zcu111`          | 4x      | FMCP        | YES |
+| [ZCU208]            | `zcu208`          | 4x      | FMCP        | YES |
+| [ZCU216]            | `zcu216`          | 4x      | FMCP        | YES |
 
 ## Build instructions
 

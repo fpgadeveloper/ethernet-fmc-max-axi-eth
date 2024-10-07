@@ -46,6 +46,18 @@ current_bd_instance $parentObj
 # SGMII PHY addresses
 set sgmii_phy_addr {2 4 13 14}
 
+# Initialize the list of unused ports
+set unused_ports {}
+
+# Work out which ports of the Quad SFP28 FMC are not used in this design
+foreach port {0 1 2 3} {
+    # Check if the current port is not in the ports list
+    if { [lsearch -exact $ports $port] == -1 } {
+        # Add the port to the unused_ports list
+        lappend unused_ports $port
+    }
+}
+
 # Add the Processor System and apply board preset
 create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e zynq_ultra_ps_e_0
 apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_board_preset "1" }  [get_bd_cells zynq_ultra_ps_e_0]
@@ -96,6 +108,17 @@ if { $num_ints > 8 } {
 } else {
   set_property -dict [list CONFIG.NUM_PORTS $num_ints] [get_bd_cells xlconcat_0]
 }
+
+# Add proc system reset for system clock
+create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset rst_100m
+connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins rst_100m/slowest_sync_clk]
+connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0] [get_bd_pins rst_100m/ext_reset_in]
+
+# Add AXI SmartConnect for DMA MM interfaces
+create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect axi_smc
+connect_bd_intf_net [get_bd_intf_pins axi_smc/M00_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/S_AXI_HP0_FPD]
+connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins axi_smc/aclk]
+connect_bd_net [get_bd_pins rst_100m/peripheral_aresetn] [get_bd_pins axi_smc/aresetn]
 
 # Add and configure AXI Ethernet IPs with AXI DMAs
 set port_with_shared_logic [lindex $ports 0]
@@ -174,13 +197,6 @@ foreach port $ports {
   apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master {/zynq_ultra_ps_e_0/M_AXI_HPM0_FPD} Slave "/axi_ethernet_${port}_dma/S_AXI_LITE" ddr_seg {Auto} intc_ip {Auto} master_apm {0}}  [get_bd_intf_pins axi_ethernet_${port}_dma/S_AXI_LITE]
   
   # Use connection automation to connect AXI MM interfaces of the DMA
-  if { [ip_exists "axi_smc"] == 0 } {
-    create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect axi_smc
-    connect_bd_intf_net [get_bd_intf_pins axi_smc/M00_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/S_AXI_HP0_FPD]
-    connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins axi_smc/aclk]
-    connect_bd_net [get_bd_pins rst_ps8_0_99M/peripheral_aresetn] [get_bd_pins axi_smc/aresetn]
-  }
-  
   apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master "/axi_ethernet_${port}_dma/M_AXI_MM2S" Slave {/zynq_ultra_ps_e_0/S_AXI_HP0_FPD} ddr_seg {Auto} intc_ip {/axi_smc} master_apm {0}}  [get_bd_intf_pins axi_ethernet_${port}_dma/M_AXI_MM2S]
   apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master "/axi_ethernet_${port}_dma/M_AXI_S2MM" Slave {/zynq_ultra_ps_e_0/S_AXI_HP0_FPD} ddr_seg {Auto} intc_ip {/axi_smc} master_apm {0}}  [get_bd_intf_pins axi_ethernet_${port}_dma/M_AXI_S2MM]
   apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master "/axi_ethernet_${port}_dma/M_AXI_SG" Slave {/zynq_ultra_ps_e_0/S_AXI_HP0_FPD} ddr_seg {Auto} intc_ip {/axi_smc} master_apm {0}}  [get_bd_intf_pins axi_ethernet_${port}_dma/M_AXI_SG]
@@ -197,6 +213,15 @@ foreach port $ports {
   include_bd_addr_seg [get_bd_addr_segs -excluded axi_ethernet_${port}_dma/Data_SG/SEG_zynq_ultra_ps_e_0_HP0_LPS_OCM]
   include_bd_addr_seg [get_bd_addr_segs -excluded axi_ethernet_${port}_dma/Data_MM2S/SEG_zynq_ultra_ps_e_0_HP0_LPS_OCM]
   include_bd_addr_seg [get_bd_addr_segs -excluded axi_ethernet_${port}_dma/Data_S2MM/SEG_zynq_ultra_ps_e_0_HP0_LPS_OCM]
+}
+
+# Correctly tie off the unused ports
+create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant const_low
+set_property CONFIG.CONST_VAL {0} [get_bd_cells const_low]
+foreach port $unused_ports {
+  # PHY RESET - hold LOW - keep unused PHYs in reset
+  create_bd_port -dir O -type rst reset_port_${port}
+  connect_bd_net [get_bd_pins const_low/dout] [get_bd_ports reset_port_${port}]
 }
 
 # signal_detect tied HIGH
@@ -230,9 +255,14 @@ set_property -dict [list \
   CONFIG.C_ALL_INPUTS {1} \
   CONFIG.C_GPIO_WIDTH {10} \
 ] [get_bd_cells axi_gpio_0]
-apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {/zynq_ultra_ps_e_0/pl_clk0 (99 MHz)} Clk_slave {Auto} Clk_xbar {/zynq_ultra_ps_e_0/pl_clk0 (99 MHz)} Master {/zynq_ultra_ps_e_0/M_AXI_HPM0_FPD} Slave {/axi_gpio_0/S_AXI} ddr_seg {Auto} intc_ip {/ps8_0_axi_periph} master_apm {0}}  [get_bd_intf_pins axi_gpio_0/S_AXI]
+connect_bd_net [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins axi_gpio_0/s_axi_aclk]
+connect_bd_net [get_bd_pins rst_100m/peripheral_aresetn] [get_bd_pins axi_gpio_0/s_axi_aresetn]
+apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master {/zynq_ultra_ps_e_0/M_AXI_HPM0_FPD} Slave {/axi_gpio_0/S_AXI} ddr_seg {Auto} intc_ip {/ps8_0_axi_periph} master_apm {0}}  [get_bd_intf_pins axi_gpio_0/S_AXI]
 create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 gpio
 connect_bd_intf_net [get_bd_intf_pins axi_gpio_0/GPIO] [get_bd_intf_ports gpio]
+
+# Assign addresses
+assign_bd_address
 
 # Restore current instance
 current_bd_instance $oldCurInst

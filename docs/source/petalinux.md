@@ -28,24 +28,8 @@ users are advised to use a Linux virtual machine to build the PetaLinux projects
    source <vivado-install-dir>/settings64.sh
    ```
 4. Build the Vivado and PetaLinux project for your specific target platform by running the following
-   commands and replacing `<target>` with one of the following: 
-   `kcu105_hpc`,
-   `uzev`,
-   `vck190_fmcp1`,
-   `vck190_fmcp2`,
-   `vek280`,
-   `vek280_es_revb`,
-   `vmk180_fmcp1`,
-   `vmk180_fmcp2`,
-   `vpk120`,
-   `vcu118_fmcp`,
-   `zcu102_hpc0`,
-   `zcu102_hpc1`,
-   `zcu104`,
-   `zcu106_hpc0`,
-   `zcu111`,
-   `zcu208`,
-   `zcu216`.
+   commands and replacing `<target>` with one of the target labels listed in the target designs table
+   in the build instructions.
    ```
    cd PetaLinux
    make petalinux TARGET=<target>
