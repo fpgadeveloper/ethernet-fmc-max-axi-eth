@@ -34,23 +34,28 @@ if {![string equal $ver $version_required]} {
 set_param board.repoPaths [get_property LOCAL_ROOT_DIR [xhub::get_xstores xilinx_board_store]]
 
 # Possible targets
-dict set target_dict kcu105_hpc { xilinx.com kcu105 mb {0 1 2 3} }
-dict set target_dict uzev { avnet.com ultrazed_7ev_cc zynqmp {0 1 2 3} }
-dict set target_dict vck190_fmcp1 { xilinx.com vck190 versal {0 1 2 3} }
-dict set target_dict vck190_fmcp2 { xilinx.com vck190 versal {0 1 2 3} }
-dict set target_dict vek280 { xilinx.com vek280 versal {0 1 2 3} }
-dict set target_dict vek280_es_revb { xilinx.com vek280_es_revb versal {0 1 2 3} }
-dict set target_dict vmk180_fmcp1 { xilinx.com vmk180 versal {0 1 2 3} }
-dict set target_dict vmk180_fmcp2 { xilinx.com vmk180 versal {0 1 2 3} }
-dict set target_dict vpk120 { xilinx.com vpk120 versal {0 1 2 3} }
-dict set target_dict vcu118 { xilinx.com vcu118 mb {0 1 2 3} }
-dict set target_dict zcu102_hpc0 { xilinx.com zcu102 zynqmp {0 1 2 3} }
-dict set target_dict zcu102_hpc1 { xilinx.com zcu102 zynqmp {0 1 2 3} }
-dict set target_dict zcu104 { xilinx.com zcu104 zynqmp {0} }
-dict set target_dict zcu106_hpc0 { xilinx.com zcu106 zynqmp {0 1 2 3} }
-dict set target_dict zcu111 { xilinx.com zcu111 zynqmp {0 1 2 3} }
-dict set target_dict zcu208 { xilinx.com zcu208 zynqmp {0 1 2 3} }
-dict set target_dict zcu216 { xilinx.com zcu216 zynqmp {0 1 2 3} }
+# UPDATER START
+dict set target_dict auboard { avnet.com auboard_15p mb { 0 1 2 3 } }
+dict set target_dict kcu105_hpc { xilinx.com kcu105 mb { 0 1 2 3 } }
+dict set target_dict uzev { avnet.com ultrazed_7ev_cc zynqmp { 0 1 2 3 } }
+dict set target_dict vck190_fmcp1 { xilinx.com vck190 versal { 0 1 2 3 } }
+dict set target_dict vck190_fmcp2 { xilinx.com vck190 versal { 0 1 2 3 } }
+dict set target_dict vek280 { xilinx.com vek280 versal { 0 1 2 3 } }
+dict set target_dict vek280_es_revb { xilinx.com vek280_es_revb versal { 0 1 2 3 } }
+dict set target_dict vhk158 { xilinx.com vhk158 versal { 0 1 2 3 } }
+dict set target_dict vmk180_fmcp1 { xilinx.com vmk180 versal { 0 1 2 3 } }
+dict set target_dict vmk180_fmcp2 { xilinx.com vmk180 versal { 0 1 2 3 } }
+dict set target_dict vpk120 { xilinx.com vpk120 versal { 0 1 2 3 } }
+dict set target_dict vpk180 { xilinx.com vpk180 versal { 0 1 2 3 } }
+dict set target_dict vcu118 { xilinx.com vcu118 mb { 0 1 2 3 } }
+dict set target_dict zcu102_hpc0 { xilinx.com zcu102 zynqmp { 0 1 2 3 } }
+dict set target_dict zcu102_hpc1 { xilinx.com zcu102 zynqmp { 0 1 2 3 } }
+dict set target_dict zcu104 { xilinx.com zcu104 zynqmp { 0 } }
+dict set target_dict zcu106_hpc0 { xilinx.com zcu106 zynqmp { 0 1 2 3 } }
+dict set target_dict zcu111 { xilinx.com zcu111 zynqmp { 0 1 2 3 } }
+dict set target_dict zcu208 { xilinx.com zcu208 zynqmp { 0 1 2 3 } }
+dict set target_dict zcu216 { xilinx.com zcu216 zynqmp { 0 1 2 3 } }
+# UPDATER END
 
 # Function to display the options and get user input
 proc selectTarget {target_dict} {

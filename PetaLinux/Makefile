@@ -12,14 +12,20 @@ TARGET ?= none
 JOBS ?= 8
 
 # valid targets (template name, flash size, flash interface, port config)
+# UPDATER START
+auboard_target := microblaze 64 SPIx4 ports-0123
+kcu105_hpc_target := microblaze 32 SPIx4 ports-0123
 uzev_target := zynqMP 0 0 ports-0123
 vck190_fmcp1_target := versal 0 0 ports-0123
 vck190_fmcp2_target := versal 0 0 ports-0123
 vek280_target := versal 0 0 ports-0123
 vek280_es_revb_target := versal 0 0 ports-0123
+vhk158_target := versal 0 0 ports-0123
 vmk180_fmcp1_target := versal 0 0 ports-0123
 vmk180_fmcp2_target := versal 0 0 ports-0123
 vpk120_target := versal 0 0 ports-0123
+vpk180_target := versal 0 0 ports-0123
+vcu118_target := microblaze 128 SPIx4 ports-0123
 zcu102_hpc0_target := zynqMP 0 0 ports-0123
 zcu102_hpc1_target := zynqMP 0 0 ports-0123
 zcu104_target := zynqMP 0 0 ports-0xxx
@@ -27,6 +33,7 @@ zcu106_hpc0_target := zynqMP 0 0 ports-0123
 zcu111_target := zynqMP 0 0 ports-0123
 zcu208_target := zynqMP 0 0 ports-0123
 zcu216_target := zynqMP 0 0 ports-0123
+# UPDATER END
 
 TARGET_LIST := $(sort $(patsubst %_target,%,$(filter %_target,$(.VARIABLES))))
 

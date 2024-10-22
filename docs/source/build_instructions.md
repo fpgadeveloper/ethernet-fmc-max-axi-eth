@@ -25,25 +25,22 @@ This repo contains several designs that target the various supported development
 FMC connectors. The table below lists the target design name, the Ethernet ports supported by the design and 
 the FMC connector on which to connect the mezzanine card.
 
+{% for group in data.groups %}
+    {% set designs_in_group = [] %}
+    {% for design in data.designs %}
+        {% if design.group == group.label and design.publish != "NO" %}
+            {% set _ = designs_in_group.append(design.label) %}
+        {% endif %}
+    {% endfor %}
+    {% if designs_in_group | length > 0 %}
+### {{ group.name }} designs
+
 | Target board        | Target design     | Ports   | FMC Slot    | License<br> required |
-|---------------------|-------------------|---------|-------------|----------------------|
-| [KCU105]            | `kcu105_hpc`      | 4x      | HPC         | YES |
-| [UltraZed-EV carrier] | `uzev`          | 4x      | HPC         | NO  |
-| [VCK190]            | `vck190_fmcp1`    | 4x      | FMCP1       | YES |
-| [VCK190]            | `vck190_fmcp2`    | 4x      | FMCP2       | YES |
-| [VEK280]            | `vek280`          | 4x      | FMCP        | YES |
-| [VEK280] ES Rev-B   | `vek280_es_revb`  | 4x      | FMCP        | YES |
-| [VMK180]            | `vmk180_fmcp1`    | 4x      | FMCP1       | YES |
-| [VMK180]            | `vmk180_fmcp2`    | 4x      | FMCP2       | YES |
-| [VPK120]            | `vpk120`          | 4x      | FMCP        | YES |
-| [VCU118]            | `vcu118_fmcp`     | 4x      | FMCP        | YES |
-| [ZCU102]            | `zcu102_hpc0`     | 4x      | HPC0        | YES |
-| [ZCU102]            | `zcu102_hpc1`     | 4x      | HPC1        | YES |
-| [ZCU104]            | `zcu104`          | 1x      | LPC         | NO  |
-| [ZCU106]            | `zcu106_hpc0`     | 4x      | HPC0        | NO  |
-| [ZCU111]            | `zcu111`          | 4x      | FMCP        | YES |
-| [ZCU208]            | `zcu208`          | 4x      | FMCP        | YES |
-| [ZCU216]            | `zcu216`          | 4x      | FMCP        | YES |
+|---------------------|-------------------|---------|-------------|-----|
+{% for design in data.designs %}{% if design.group == group.label and design.publish != "NO" %}| [{{ design.board }}]({{ design.link }}) | `{{ design.label }}` | {{ design.lanes | length }}x | {{ design.connector }} | {{ design.license }} |
+{% endif %}{% endfor %}
+{% endif %}
+{% endfor %}
 
 ## Windows users
 
