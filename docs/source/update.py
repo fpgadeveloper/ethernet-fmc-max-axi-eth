@@ -143,6 +143,13 @@ def get_vitis_targets(data):
         targets.append(target)
     return(targets)
 
+def get_vitis_build_targets(data):
+    targets = []
+    for design in data['designs']:
+        target = 'dict set target_dict {} {{ {} }}'.format(design['label'],design['boardname'])
+        targets.append(target)
+    return(targets)
+
 def get_ignore_paths(data):
     paths = []
     for design in data['designs']:
@@ -209,10 +216,15 @@ vivado_build_tcl = '../../Vivado/scripts/build.tcl'
 vivado_build_targets = get_vivado_build_targets(data)
 update_file(vivado_build_tcl,vivado_build_targets)
 
-## Update the Vitis makefile
-#vitis_makefile = '../../Vitis/Makefile'
-#vitis_targets = get_vitis_targets(data)
-#update_file(vitis_makefile,vitis_targets)
+# Update the Vitis makefile
+vitis_makefile = '../../Vitis/Makefile'
+vitis_targets = get_vitis_targets(data)
+update_file(vitis_makefile,vitis_targets)
+
+# Update the Vitis build.tcl
+vitis_build_tcl = '../../Vitis/tcl/build-vitis.tcl'
+vitis_build_targets = get_vitis_build_targets(data)
+update_file(vitis_build_tcl,vitis_build_targets)
 
 # Update the PetaLinux makefile
 petalinux_makefile = '../../PetaLinux/Makefile'
