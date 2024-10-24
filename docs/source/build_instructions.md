@@ -35,9 +35,9 @@ the FMC connector on which to connect the mezzanine card.
     {% if designs_in_group | length > 0 %}
 ### {{ group.name }} designs
 
-| Target board        | Target design     | Ports   | FMC Slot    | License<br> required |
-|---------------------|-------------------|---------|-------------|-----|
-{% for design in data.designs %}{% if design.group == group.label and design.publish != "NO" %}| [{{ design.board }}]({{ design.link }}) | `{{ design.label }}` | {{ design.lanes | length }}x | {{ design.connector }} | {{ design.license }} |
+| Target board        | Target design     | Ports   | FMC Slot    | Standalone<br> Echo Server | PetaLinux | License<br> required |
+|---------------------|-------------------|---------|-------------|-----|-----|-----|
+{% for design in data.designs %}{% if design.group == group.label and design.publish != "NO" %}| [{{ design.board }}]({{ design.link }}) | `{{ design.label }}` | {{ design.lanes | length }}x | {{ design.connector }} | {% if design.baremetal == "YES" %} ✅ {% else %} ❌ {% endif %} | {% if design.petalinux == "YES" %} ✅ {% else %} ❌ {% endif %} | {{ design.license }} |
 {% endif %}{% endfor %}
 {% endif %}
 {% endfor %}
@@ -66,6 +66,15 @@ physical or virtual) running one of the [supported Linux distributions].
    In the window that opens, tick **Include bitstream** and use the default name and location
    for the XSA file.
 
+### Build Vitis workspace in Windows
+
+Before running these steps, you must first build and export the Vivado project as described above.
+
+1. Return to Windows Explorer and browse to the Vitis directory in the repo.
+2. Double click the `build-vitis.bat` batch file. You will be prompted to select a target design.
+   A Vitis workspace with hardware platform and software application will be created for the
+   selected target design. You will find the Vitis workspace in the folder `Vitis/<target>_workspace`.
+
 ## Linux users
 
 These projects can be built using a machine (either physical or virtual) with one of the 
@@ -92,7 +101,8 @@ to build the Vivado and PetaLinux projects with a single command.
    ```
    make project TARGET=<target>
    ```
-   Valid target labels are listed in the table of target designs above.
+   Valid target labels are:
+   {% for design in data.designs %} `{{ design.label }}`{{ ", " if not loop.last else "." }} {% endfor %}
    That will create the Vivado project and block design without generating a bitstream or exporting to XSA.
 4. Open the generated project in the Vivado GUI and click **Generate Bitstream**. Once the build is
    complete, select **File->Export->Export Hardware** and be sure to tick **Include bitstream** and use
@@ -103,6 +113,31 @@ to build the Vivado and PetaLinux projects with a single command.
    make xsa TARGET=<target>
    ```
    
+### Build Vitis workspace in Linux
+
+The following steps are required if you wish to build and run the [standalone application](stand_alone). You can
+skip to the following section if you instead want to use PetaLinux. You are not required to have built the
+Vivado design before following these steps, as the Makefile triggers the Vivado build for the corresponding
+design if it has not already been done.
+
+1. Launch the setup script for Vivado (only if you skipped the Vivado build steps above):
+   ```
+   source <path-to-vivado-install>/2024.1/settings64.sh
+   ```
+2. Launch the setup scripts for Vitis:
+   ```
+   source <path-to-vitis-install>/2024.1/settings64.sh
+   ```
+3. To build the Vitis workspace, `cd` to the Vitis directory in the repo,
+   then run make to create the Vitis workspace and compile the standalone application:
+   ```
+   cd ethernet-fmc-max-axi-eth/Vitis
+   make workspace TARGET=<target>
+   ```
+   Valid target labels for the workspaces are:
+   {% for design in data.designs %}{% if design.baremetal == "YES" %} `{{ design.label }}`{{ ", " if not loop.last else "." }} {% endif %}{% endfor %}
+   You will find the Vitis workspace in the folder `Vitis/<target>_workspace`.
+
 ### Build PetaLinux project in Linux
 
 These steps will build the PetaLinux project for the target design. You are not required to have built the
@@ -123,7 +158,8 @@ design if it has not already been done.
    cd PetaLinux
    make petalinux TARGET=<target>
    ```
-   Valid target labels are listed in the table of target designs above.
+   Valid target labels for PetaLinux projects are:
+   {% for design in data.designs %}{% if design.petalinux == "YES" %} `{{ design.label }}`{{ ", " if not loop.last else "." }} {% endif %}{% endfor %}
    Note that if you skipped the Vivado build steps above, the Makefile will first generate and
    build the Vivado project, and then build the PetaLinux project.
 

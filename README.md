@@ -94,12 +94,22 @@ source <path-to-petalinux>/2024.1/settings.sh
 source <path-to-vivado>/2024.1/settings64.sh
 ```
 
-Build all (Vivado project and PetaLinux):
+To build the standalone lwIP echo server application (Vivado project and Vitis workspace):
+
+```
+cd ethernet-fmc-max-axi-eth/Vitis
+make workspace TARGET=zcu106_hpc0
+```
+
+To build the PetaLinux image (Vivado project and PetaLinux):
 
 ```
 cd ethernet-fmc-max-axi-eth/PetaLinux
 make petalinux TARGET=zcu106_hpc0
 ```
+
+Replace the target label in these commands with the one corresponding to the target design of your
+choice from the tables above.
 
 ## Contribute
 
