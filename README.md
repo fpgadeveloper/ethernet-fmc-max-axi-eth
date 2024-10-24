@@ -41,29 +41,29 @@ require a license to generate a bitstream with the AMD Xilinx tools.
 <!-- updater start -->
 ### Zynq UltraScale+ designs
 
-| Target board          | Target design      | Ports       | FMC Slot    | License<br> required |
-|-----------------------|--------------------|-------------|-------------|-------|
-| [UltraZed-EV Carrier] | `uzev`             | 4x          | HPC         | NO    |
-| [ZCU102]              | `zcu102_hpc0`      | 4x          | HPC0        | YES   |
-| [ZCU102]              | `zcu102_hpc1`      | 4x          | HPC1        | YES   |
-| [ZCU104]              | `zcu104`           | 1x          | LPC         | NO    |
-| [ZCU106]              | `zcu106_hpc0`      | 4x          | HPC0        | NO    |
-| [ZCU111]              | `zcu111`           | 4x          | FMCP        | YES   |
-| [ZCU208]              | `zcu208`           | 4x          | FMCP        | YES   |
-| [ZCU216]              | `zcu216`           | 4x          | FMCP        | YES   |
+| Target board          | Target design      | Ports       | FMC Slot    | Standalone<br> Echo Server | PetaLinux | License<br> required |
+|-----------------------|--------------------|-------------|-------------|-------|-------|-------|
+| [UltraZed-EV Carrier] | `uzev`             | 4x          | HPC         | :white_check_mark: | :white_check_mark: | NO    |
+| [ZCU102]              | `zcu102_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | YES   |
+| [ZCU102]              | `zcu102_hpc1`      | 4x          | HPC1        | :white_check_mark: | :white_check_mark: | YES   |
+| [ZCU104]              | `zcu104`           | 1x          | LPC         | :white_check_mark: | :white_check_mark: | NO    |
+| [ZCU106]              | `zcu106_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | NO    |
+| [ZCU111]              | `zcu111`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | YES   |
+| [ZCU208]              | `zcu208`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | YES   |
+| [ZCU216]              | `zcu216`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | YES   |
 
 ### Versal designs
 
-| Target board          | Target design      | Ports       | FMC Slot    | License<br> required |
-|-----------------------|--------------------|-------------|-------------|-------|
-| [VCK190]              | `vck190_fmcp1`     | 4x          | FMCP1       | YES   |
-| [VCK190]              | `vck190_fmcp2`     | 4x          | FMCP2       | YES   |
-| [VEK280]              | `vek280`           | 4x          | FMCP        | YES   |
-| [VHK158]              | `vhk158`           | 4x          | FMCP        | YES   |
-| [VMK180]              | `vmk180_fmcp1`     | 4x          | FMCP1       | YES   |
-| [VMK180]              | `vmk180_fmcp2`     | 4x          | FMCP2       | YES   |
-| [VPK120]              | `vpk120`           | 4x          | FMCP        | YES   |
-| [VPK180]              | `vpk180`           | 4x          | FMCP        | YES   |
+| Target board          | Target design      | Ports       | FMC Slot    | Standalone<br> Echo Server | PetaLinux | License<br> required |
+|-----------------------|--------------------|-------------|-------------|-------|-------|-------|
+| [VCK190]              | `vck190_fmcp1`     | 4x          | FMCP1       | :white_check_mark: | :white_check_mark: | YES   |
+| [VCK190]              | `vck190_fmcp2`     | 4x          | FMCP2       | :white_check_mark: | :white_check_mark: | YES   |
+| [VEK280]              | `vek280`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | YES   |
+| [VHK158]              | `vhk158`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | YES   |
+| [VMK180]              | `vmk180_fmcp1`     | 4x          | FMCP1       | :white_check_mark: | :white_check_mark: | YES   |
+| [VMK180]              | `vmk180_fmcp2`     | 4x          | FMCP2       | :white_check_mark: | :white_check_mark: | YES   |
+| [VPK120]              | `vpk120`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | YES   |
+| [VPK180]              | `vpk180`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | YES   |
 
 [UltraZed-EV Carrier]: https://www.xilinx.com/products/boards-and-kits/1-1s78dxb.html
 [ZCU102]: https://www.xilinx.com/zcu102
@@ -79,6 +79,17 @@ require a license to generate a bitstream with the AMD Xilinx tools.
 [VPK120]: https://www.xilinx.com/vpk120
 [VPK180]: https://www.xilinx.com/vpk180
 <!-- updater end -->
+
+## Software
+
+These reference designs can be driven by either a standalone application or within a PetaLinux environment. 
+The repository includes all necessary scripts and code to build both environments. The table 
+below outlines the corresponding applications available in each environment:
+
+| Environment      | Available Applications  |
+|------------------|-------------------------|
+| Standalone       | lwIP Echo Server |
+| PetaLinux        | Built-in Linux commands<br>Additional tools: ethtool, phytool, iperf3 |
 
 ## Build instructions
 

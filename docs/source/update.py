@@ -22,6 +22,8 @@ def load_json():
 # Create design tables for the README.md file
 # This function determines the formatting of the design tables
 def create_tables(data):
+    # Emoji dict
+    to_emoji = {"YES": ":white_check_mark:", "NO": ":x:"}
     # Determine which groups actually have designs
     used_groups = []
     for group in data['groups']:
@@ -37,19 +39,22 @@ def create_tables(data):
     for group in used_groups:
         tables.append('### {} designs'.format(group['name']))
         tables.append('')
-        tables.append('| Target board          | Target design      | Ports       | FMC Slot    | License<br> required |')
-        tables.append('|-----------------------|--------------------|-------------|-------------|-------|')
+        tables.append('| Target board          | Target design      | Ports       | FMC Slot    | Standalone<br> Echo Server | PetaLinux | License<br> required |')
+        tables.append('|-----------------------|--------------------|-------------|-------------|-------|-------|-------|')
         for design in data['designs']:
             if design['publish'] == 'NO':
                 continue
             if design['group'] == group['label']:
-                col1 = '[{0}]'.format(design['board']).ljust(21)
-                col2 = '`{0}`'.format(design['label']).ljust(18)
+                cols = []
+                cols.append('[{0}]'.format(design['board']).ljust(21))
+                cols.append('`{0}`'.format(design['label']).ljust(18))
                 ports = '{}x'.format(len(design['lanes']))
-                col3 = '{0}'.format(ports).ljust(11)
-                col4 = '{0}'.format(design['connector']).ljust(11)
-                col5 = '{0}'.format(design['license']).ljust(5)
-                tables.append('| {0} | {1} | {2} | {3} | {4} |'.format(col1,col2,col3,col4,col5))
+                cols.append('{0}'.format(ports).ljust(11))
+                cols.append('{0}'.format(design['connector']).ljust(11))
+                cols.append('{0}'.format(to_emoji[design['baremetal']]).ljust(5))
+                cols.append('{0}'.format(to_emoji[design['petalinux']]).ljust(5))
+                cols.append('{0}'.format(design['license']).ljust(5))
+                tables.append('| ' + ' | '.join(cols) + ' |')
                 links[design['board']] = design['link']
         tables.append('')
     # Add the board links

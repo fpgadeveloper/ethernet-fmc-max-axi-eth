@@ -106,12 +106,14 @@ if {$is_vpk120 || $is_vpk180} {
   set_property -dict [list \
     CONFIG.CLOCK_MODE {Custom} \
     CONFIG.PS_PL_CONNECTIVITY_MODE {Custom} \
+    CONFIG.IO_CONFIG_MODE {Custom} \
     CONFIG.PS_PMC_CONFIG { \
       CLOCK_MODE {Custom} \
       DDR_MEMORY_MODE {Connectivity to DDR via NOC} \
       DEBUG_MODE {JTAG} \
       DESIGN_MODE {1} \
       DEVICE_INTEGRITY_MODE {Sysmon temperature voltage and external IO monitoring} \
+      IO_CONFIG_MODE {Custom} \
       PMC_CRP_PL0_REF_CTRL_FREQMHZ {100} \
       PMC_CRP_PL1_REF_CTRL_FREQMHZ {50} \
       PMC_GPIO0_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 25}}} \
@@ -151,6 +153,7 @@ if {$is_vpk120 || $is_vpk180} {
       PS_PCIE_EP_RESET2_IO {PS_MIO 19} \
       PS_PCIE_RESET {ENABLE 1} \
       PS_PL_CONNECTIVITY_MODE {Custom} \
+      PS_TTC0_PERIPHERAL_ENABLE {1} \
       PS_UART0_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 42 .. 43}}} \
       PS_USB3_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 13 .. 25}}} \
       PS_USE_FPD_CCI_NOC {1} \
@@ -172,12 +175,14 @@ if {$is_vpk120 || $is_vpk180} {
   set_property -dict [list \
     CONFIG.CLOCK_MODE {Custom} \
     CONFIG.PS_PL_CONNECTIVITY_MODE {Custom} \
+    CONFIG.IO_CONFIG_MODE {Custom} \
     CONFIG.PS_PMC_CONFIG { \
       CLOCK_MODE {Custom} \
       DDR_MEMORY_MODE {Connectivity to DDR via NOC} \
       DEBUG_MODE {JTAG} \
       DESIGN_MODE {1} \
       DEVICE_INTEGRITY_MODE {Sysmon temperature voltage and external IO monitoring} \
+      IO_CONFIG_MODE {Custom} \
       PMC_CRP_PL0_REF_CTRL_FREQMHZ {100} \
       PMC_CRP_PL1_REF_CTRL_FREQMHZ {50} \
       PMC_GPIO0_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 25}}} \
@@ -215,6 +220,7 @@ if {$is_vpk120 || $is_vpk180} {
       PS_PCIE_EP_RESET2_IO {PS_MIO 19} \
       PS_PCIE_RESET {ENABLE 1} \
       PS_PL_CONNECTIVITY_MODE {Custom} \
+      PS_TTC0_PERIPHERAL_ENABLE {1} \
       PS_UART0_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 42 .. 43}}} \
       PS_USB3_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 13 .. 25}}} \
       PS_USE_FPD_CCI_NOC {1} \
@@ -237,12 +243,14 @@ if {$is_vpk120 || $is_vpk180} {
   set_property -dict [list \
     CONFIG.CLOCK_MODE {Custom} \
     CONFIG.PS_PL_CONNECTIVITY_MODE {Custom} \
+    CONFIG.IO_CONFIG_MODE {Custom} \
     CONFIG.PS_PMC_CONFIG { \
       CLOCK_MODE {Custom} \
       DDR_MEMORY_MODE {Connectivity to DDR via NOC} \
       DEBUG_MODE {JTAG} \
       DESIGN_MODE {1} \
       DEVICE_INTEGRITY_MODE {Sysmon temperature voltage and external IO monitoring} \
+      IO_CONFIG_MODE {Custom} \
       PMC_CRP_PL0_REF_CTRL_FREQMHZ {100} \
       PMC_CRP_PL1_REF_CTRL_FREQMHZ {50} \
       PMC_GPIO0_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 25}}} \
@@ -280,6 +288,7 @@ if {$is_vpk120 || $is_vpk180} {
       PS_PCIE_EP_RESET2_IO {PS_MIO 19} \
       PS_PCIE_RESET {ENABLE 1} \
       PS_PL_CONNECTIVITY_MODE {Custom} \
+      PS_TTC0_PERIPHERAL_ENABLE {1} \
       PS_UART0_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 42 .. 43}}} \
       PS_USB3_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 13 .. 25}}} \
       PS_USE_FPD_CCI_NOC {1} \
@@ -301,11 +310,13 @@ if {$is_vpk120 || $is_vpk180} {
   set_property -dict [list \
     CONFIG.CLOCK_MODE {Custom} \
     CONFIG.PS_PL_CONNECTIVITY_MODE {Custom} \
+    CONFIG.IO_CONFIG_MODE {Custom} \
     CONFIG.PS_PMC_CONFIG { \
       CLOCK_MODE {Custom} \
       DDR_MEMORY_MODE {Connectivity to DDR via NOC} \
       DEBUG_MODE {JTAG} \
       DESIGN_MODE {1} \
+      IO_CONFIG_MODE {Custom} \
       PMC_CRP_PL0_REF_CTRL_FREQMHZ {100} \
       PMC_CRP_PL1_REF_CTRL_FREQMHZ {50} \
       PMC_GPIO0_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 25}}} \
@@ -353,6 +364,7 @@ if {$is_vpk120 || $is_vpk180} {
       PS_PCIE_EP_RESET2_IO {PMC_MIO 39} \
       PS_PCIE_RESET {ENABLE 1} \
       PS_PL_CONNECTIVITY_MODE {Custom} \
+      PS_TTC0_PERIPHERAL_ENABLE {1} \
       PS_UART0_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 42 .. 43}}} \
       PS_USB3_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 13 .. 25}}} \
       PS_USE_FPD_CCI_NOC {1} \
