@@ -13,7 +13,7 @@ boards. The repository contains all necessary scripts and code to build these de
 {% for group in data.groups %}
     {% set designs_in_group = [] %}
     {% for design in data.designs %}
-        {% if design.group == group.label and design.publish != "NO" %}
+        {% if design.group == group.label and design.publish %}
             {% set _ = designs_in_group.append(design.label) %}
         {% endif %}
     {% endfor %}
@@ -22,7 +22,7 @@ boards. The repository contains all necessary scripts and code to build these de
 
 | Target board        | FMC Slot Used | Supported<br>Num. Ports   | Standalone<br> Echo Server | PetaLinux |
 |---------------------|---------------|---------|-----|-----|
-{% for design in data.designs %}{% if design.group == group.label and design.publish != "NO" %}| [{{ design.board }}]({{ design.link }}) | {{ design.connector }} | {{ design.lanes | length }}x | {% if design.baremetal == "YES" %} ✅ {% else %} ❌ {% endif %} | {% if design.petalinux == "YES" %} ✅ {% else %} ❌ {% endif %} |
+{% for design in data.designs %}{% if design.group == group.label and design.publish %}| [{{ design.board }}]({{ design.link }}) | {{ design.connector }} | {{ design.lanes | length }}x | {% if design.baremetal %} ✅ {% else %} ❌ {% endif %} | {% if design.petalinux %} ✅ {% else %} ❌ {% endif %} |
 {% endif %}{% endfor %}
 {% endif %}
 {% endfor %}
