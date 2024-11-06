@@ -4,7 +4,7 @@
 
 RM = rm -rf
 ROOT_DIR = $(shell pwd)
-BD_NAME = axieth
+BD_NAME = axiethmax
 
 # defaults
 .DEFAULT_GOAL := bootimage

@@ -35,6 +35,7 @@
 #include "lwipopts.h"
 #include "sleep.h"
 #include "xemac_ieee_reg.h"
+#include "xparameters.h"
 
 #define PHY_R0_ISOLATE  						0x0400
 #define PHY_DETECT_REG  						1
@@ -106,14 +107,22 @@
 
 extern u32_t phyaddrforemac;
 
-#define NUM_PORTS 4
+#define NUM_PORTS XPAR_XAXIETHERNET_NUM_INSTANCES
 
 // Array to store base addresses
 uint32_t base_addresses[NUM_PORTS] = {
-	XPAR_AXI_ETHERNET_0_BASEADDR,
-	XPAR_AXI_ETHERNET_1_BASEADDR,
-	XPAR_AXI_ETHERNET_2_BASEADDR,
-	XPAR_AXI_ETHERNET_3_BASEADDR
+#if NUM_PORTS > 0
+    XPAR_AXI_ETHERNET_0_BASEADDR,
+#endif
+#if NUM_PORTS > 1
+    XPAR_AXI_ETHERNET_1_BASEADDR,
+#endif
+#if NUM_PORTS > 2
+    XPAR_AXI_ETHERNET_2_BASEADDR,
+#endif
+#if NUM_PORTS > 3
+    XPAR_AXI_ETHERNET_3_BASEADDR
+#endif
 };
 
 // AXI Ethernet instance with MDIO bus

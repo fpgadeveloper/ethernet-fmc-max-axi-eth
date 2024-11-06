@@ -4102,3 +4102,6 @@ CONFIG_ethtool-dbg=y
 CONFIG_iperf3=y
 CONFIG_phytool=y
 
+CONFIG_zcu106-1.0=n
+CONFIG_zcu106-2.0=n
+

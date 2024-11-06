@@ -35,7 +35,7 @@ In order to test this design on hardware, you will need the following:
 
 This repo contains several designs that target various supported development boards and their
 FMC connectors. The table below lists the target design name, the number of ports supported by the design and 
-the FMC connector on which to connect the Ethernet FMC Max. Some of the target designs
+the FMC connector on which to connect the mezzanine card. Some of the target designs
 require a license to generate a bitstream with the AMD Xilinx tools.
 
 <!-- updater start -->
