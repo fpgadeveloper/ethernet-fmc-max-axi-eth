@@ -1,8 +1,8 @@
-# AXI 1G Ethernet Reference Designs for Ethernet FMC Max
+# AXI 1G Ethernet Ref Designs for Ethernet FMC Max
 
 ## Description
 
-This project demonstrates the use of the Opsero [Ethernet FMC Max] and it supports
+This project demonstrates the use of the Opsero [Ethernet FMC Max] (OP080) and it supports
 several development boards for UltraScale FPGA, Zynq UltraScale+ and Versal ACAP. 
 The design contains 4 AXI 1G Ethernet Subsystem blocks configured with DMAs.
 

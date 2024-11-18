@@ -118,6 +118,7 @@ if {$is_vpk120 || $is_vpk180} {
       PMC_CRP_PL1_REF_CTRL_FREQMHZ {50} \
       PMC_GPIO0_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 25}}} \
       PMC_GPIO1_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 26 .. 51}}} \
+      PMC_GPIO_EMIO_PERIPHERAL_ENABLE {1} \
       PMC_MIO37 {{AUX_IO 0} {DIRECTION out} {DRIVE_STRENGTH 8mA} {OUTPUT_DATA high} {PULL pullup} {SCHMITT 0} {SLEW slow} {USAGE GPIO}} \
       PMC_QSPI_FBCLK {{ENABLE 1} {IO {PMC_MIO 6}}} \
       PMC_QSPI_PERIPHERAL_DATA_MODE {x4} \
@@ -187,6 +188,7 @@ if {$is_vpk120 || $is_vpk180} {
       PMC_CRP_PL1_REF_CTRL_FREQMHZ {50} \
       PMC_GPIO0_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 25}}} \
       PMC_GPIO1_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 26 .. 51}}} \
+      PMC_GPIO_EMIO_PERIPHERAL_ENABLE {1} \
       PMC_MIO12 {{AUX_IO 0} {DIRECTION out} {DRIVE_STRENGTH 8mA} {OUTPUT_DATA default} {PULL pullup} {SCHMITT 0} {SLEW slow} {USAGE GPIO}} \
       PMC_MIO37 {{AUX_IO 0} {DIRECTION out} {DRIVE_STRENGTH 8mA} {OUTPUT_DATA high} {PULL pullup} {SCHMITT 0} {SLEW slow} {USAGE GPIO}} \
       PMC_OSPI_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 11}} {MODE Single}} \
@@ -255,6 +257,7 @@ if {$is_vpk120 || $is_vpk180} {
       PMC_CRP_PL1_REF_CTRL_FREQMHZ {50} \
       PMC_GPIO0_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 25}}} \
       PMC_GPIO1_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 26 .. 51}}} \
+      PMC_GPIO_EMIO_PERIPHERAL_ENABLE {1} \
       PMC_MIO12 {{AUX_IO 0} {DIRECTION out} {DRIVE_STRENGTH 8mA} {OUTPUT_DATA default} {PULL pullup} {SCHMITT 0} {SLEW slow} {USAGE GPIO}} \
       PMC_MIO37 {{AUX_IO 0} {DIRECTION out} {DRIVE_STRENGTH 8mA} {OUTPUT_DATA high} {PULL pullup} {SCHMITT 0} {SLEW slow} {USAGE GPIO}} \
       PMC_OSPI_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 11}} {MODE Single}} \
@@ -321,6 +324,7 @@ if {$is_vpk120 || $is_vpk180} {
       PMC_CRP_PL1_REF_CTRL_FREQMHZ {50} \
       PMC_GPIO0_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 25}}} \
       PMC_GPIO1_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 26 .. 51}}} \
+      PMC_GPIO_EMIO_PERIPHERAL_ENABLE {1} \
       PMC_MIO37 {{AUX_IO 0} {DIRECTION out} {DRIVE_STRENGTH 8mA} {OUTPUT_DATA high} {PULL pullup} {SCHMITT 0} {SLEW slow} {USAGE GPIO}} \
       PMC_OSPI_PERIPHERAL {{ENABLE 0} {IO {PMC_MIO 0 .. 11}} {MODE Single}} \
       PMC_QSPI_COHERENCY {0} \
@@ -421,9 +425,9 @@ connect_bd_net [get_bd_pins versal_cips_0/pl0_resetn] [get_bd_pins rst_pl0/ext_r
 
 # AXI SmartConnect for AXI Lite interfaces
 create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect axi_smc
-set_property CONFIG.NUM_MI {2} [get_bd_cells axi_smc]
+set_property -dict [list CONFIG.NUM_SI {1} CONFIG.NUM_MI {2} ] [get_bd_cells axi_smc]
 connect_bd_net [get_bd_pins $sys_clk] [get_bd_pins axi_smc/aclk]
-connect_bd_net [get_bd_pins rst_pl0/peripheral_aresetn] [get_bd_pins axi_smc/aresetn]
+connect_bd_net [get_bd_pins rst_pl0/interconnect_aresetn] [get_bd_pins axi_smc/aresetn]
 connect_bd_intf_net [get_bd_intf_pins versal_cips_0/M_AXI_LPD] [get_bd_intf_pins axi_smc/S00_AXI]
 
 # GT ref clock and utility buffer
@@ -569,9 +573,6 @@ foreach port $ports {
   connect_bd_intf_net [get_bd_intf_pins axi_ethernet_${port}_dma/M_AXI_S2MM] [get_bd_intf_pins axi_noc_0/S${index_padded}_AXI]
   set noc_port_index [expr {$noc_port_index + 1}]
 
-  # External PHY RESET
-  create_bd_port -dir O -type rst reset_port_${port}
-  connect_bd_net [get_bd_pins /axi_ethernet_${port}/phy_rst_n] [get_bd_ports reset_port_${port}]
 }
 
 # Connect constant values to BUFG GTs
@@ -787,6 +788,20 @@ set_property -dict [list \
 ] [get_bd_cells gt_quad_base_0]
 
 connect_bd_net [get_bd_pins util_ds_buf_0/IBUF_OUT] [get_bd_pins gt_quad_base_0/GT_REFCLK1]
+
+# PHY reset signals
+foreach port $ports {
+  create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice xlslice_phy${port}
+  set_property -dict [list \
+    CONFIG.DIN_FROM $port \
+    CONFIG.DIN_TO $port \
+    CONFIG.DIN_WIDTH {64} \
+  ] [get_bd_cells xlslice_phy${port}]
+  connect_bd_net [get_bd_pins versal_cips_0/PMC_GPIO_o] [get_bd_pins xlslice_phy${port}/Din]
+  # External PHY RESET
+  create_bd_port -dir O -type rst reset_port_${port}
+  connect_bd_net [get_bd_pins /xlslice_phy${port}/Dout] [get_bd_ports reset_port_${port}]
+}
 
 # signal_detect and MMCM locked tied HIGH
 create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant const_high
