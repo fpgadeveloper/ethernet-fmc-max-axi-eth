@@ -22,7 +22,6 @@ uzev_target := zynqMP
 vck190_fmcp1_target := versal
 vck190_fmcp2_target := versal
 vek280_target := versal
-vek280_es_revb_target := versal
 vhk158_target := versal
 vmk180_fmcp1_target := versal
 vmk180_fmcp2_target := versal

@@ -43,7 +43,6 @@ dict set target_dict uzev { ultrazed_7ev_cc }
 dict set target_dict vck190_fmcp1 { vck190 }
 dict set target_dict vck190_fmcp2 { vck190 }
 dict set target_dict vek280 { vek280 }
-dict set target_dict vek280_es_revb { vek280_es_revb }
 dict set target_dict vhk158 { vhk158 }
 dict set target_dict vmk180_fmcp1 { vmk180 }
 dict set target_dict vmk180_fmcp2 { vmk180 }

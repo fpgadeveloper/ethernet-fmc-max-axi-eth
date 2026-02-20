@@ -1,5 +1,6 @@
 RemoteSystemsTempFiles/
 Vivado/.Xil/
+Vivado/logs/
 *.log
 *.jou
 Vitis/*_workspace/
@@ -22,8 +23,6 @@ Vivado/vck190_fmcp2/
 PetaLinux/vck190_fmcp2/
 Vivado/vek280/
 PetaLinux/vek280/
-Vivado/vek280_es_revb/
-PetaLinux/vek280_es_revb/
 Vivado/vhk158/
 PetaLinux/vhk158/
 Vivado/vmk180_fmcp1/

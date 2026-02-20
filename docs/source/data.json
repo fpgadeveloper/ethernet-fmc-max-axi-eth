@@ -115,22 +115,6 @@
       "flashintf": "0"
     },
     {
-      "publish": false,
-      "label": "vek280_es_revb",
-      "board": "VEK280 ES Rev-B",
-      "link": "https://www.xilinx.com/vek280",
-      "url": "xilinx.com",
-      "boardname": "vek280_es_revb",
-      "lanes": [0,1,2,3],
-      "connector": "FMCP",
-      "group": "versal",
-      "petalinux": true,
-      "baremetal": true,
-      "license": true,
-      "flashsize": "0",
-      "flashintf": "0"
-    },
-    {
       "publish": true,
       "label": "vhk158",
       "board": "VHK158",

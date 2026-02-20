@@ -17,16 +17,16 @@ Important links:
 
 ## Requirements
 
-This project is designed for version 2024.1 of the Xilinx tools (Vivado/Vitis/PetaLinux). 
+This project is designed for version 2025.2 of the Xilinx tools (Vivado/Vitis/PetaLinux). 
 If you are using an older version of the Xilinx tools, then refer to the 
 [release tags](https://github.com/fpgadeveloper/ethernet-fmc-max-axi-eth/tags "releases")
 to find the version of this repository that matches your version of the tools.
 
 In order to test this design on hardware, you will need the following:
 
-* Vivado 2024.1
-* Vitis 2024.1
-* PetaLinux Tools 2024.1
+* Vivado 2025.2
+* Vitis 2025.2
+* PetaLinux Tools 2025.2
 * [Ethernet FMC Max]
 * One of the target platforms listed below
 * [Xilinx Soft TEMAC license](https://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
@@ -80,6 +80,18 @@ require a license to generate a bitstream with the AMD Xilinx tools.
 [VPK180]: https://www.xilinx.com/vpk180
 <!-- updater end -->
 
+### AUBoard board files
+
+The board definition files for the AUBoard are not currently included in the AMD Xilinx Board Store.
+To enable Vivado to recognize this board, the required board files have been included in this
+repository as a Git submodule (`submodules/avnet-bdf`), which is a fork of
+[Avnet's BDF repository](https://github.com/Avnet/bdf). When cloning this repo, use the `--recursive`
+flag to ensure the board files are downloaded:
+
+```
+git clone --recursive <repo-url>
+```
+
 Notes:
 
 1. The Vivado Edition column indicates which designs are supported by the Vivado *Standard* Edition, the
@@ -107,8 +119,8 @@ git clone https://github.com/fpgadeveloper/ethernet-fmc-max-axi-eth.git
 Source Vivado and PetaLinux tools:
 
 ```
-source <path-to-petalinux>/2024.1/settings.sh
-source <path-to-vivado>/2024.1/settings64.sh
+source <path-to-petalinux>/2025.2/settings.sh
+source <path-to-vivado>/2025.2/settings64.sh
 ```
 
 To build the standalone lwIP echo server application (Vivado project and Vitis workspace):
