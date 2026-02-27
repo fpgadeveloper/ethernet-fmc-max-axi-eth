@@ -97,23 +97,24 @@ if {$is_vpk120 || $is_vek280 || $is_vpk180} {
 
 # Extra PS PMC config for this design
 # -----------------------------------
+# - PMC GPIO EMIO: enable
 # - Clocking -> Output clocks -> PMC domain clocks -> PL Fabric clocks -> PL CLK0: Enable 100MHz
 # - Clocking -> Output clocks -> PMC domain clocks -> PL Fabric clocks -> PL CLK1: Enable 50MHz
 # - PL resets: 1
 # - M_AXI_LPD: enable
 # - PL to PS interrupts: enable ALL (IRQ0-15)
+
 if {$is_vpk120 || $is_vpk180} {
   set_property -dict [list \
     CONFIG.CLOCK_MODE {Custom} \
+    CONFIG.PS_BOARD_INTERFACE {Custom} \
     CONFIG.PS_PL_CONNECTIVITY_MODE {Custom} \
-    CONFIG.IO_CONFIG_MODE {Custom} \
     CONFIG.PS_PMC_CONFIG { \
       CLOCK_MODE {Custom} \
       DDR_MEMORY_MODE {Connectivity to DDR via NOC} \
       DEBUG_MODE {JTAG} \
       DESIGN_MODE {1} \
       DEVICE_INTEGRITY_MODE {Sysmon temperature voltage and external IO monitoring} \
-      IO_CONFIG_MODE {Custom} \
       PMC_CRP_PL0_REF_CTRL_FREQMHZ {100} \
       PMC_CRP_PL1_REF_CTRL_FREQMHZ {50} \
       PMC_GPIO0_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 25}}} \
@@ -129,7 +130,7 @@ if {$is_vpk120 || $is_vpk180} {
       PMC_SD1_PERIPHERAL {{CLK_100_SDR_OTAP_DLY 0x3} {CLK_200_SDR_OTAP_DLY 0x2} {CLK_50_DDR_ITAP_DLY 0x36} {CLK_50_DDR_OTAP_DLY 0x3} {CLK_50_SDR_ITAP_DLY 0x2C} {CLK_50_SDR_OTAP_DLY 0x4} {ENABLE 1} {IO {PMC_MIO 26 .. 36}}} \
       PMC_SD1_SLOT_TYPE {SD 3.0} \
       PMC_USE_PMC_NOC_AXI0 {1} \
-      PS_BOARD_INTERFACE {ps_pmc_fixed_io} \
+      PS_BOARD_INTERFACE {Custom} \
       PS_ENET0_MDIO {{ENABLE 1} {IO {PS_MIO 24 .. 25}}} \
       PS_ENET0_PERIPHERAL {{ENABLE 1} {IO {PS_MIO 0 .. 11}}} \
       PS_GEN_IPI0_ENABLE {1} \
@@ -154,7 +155,6 @@ if {$is_vpk120 || $is_vpk180} {
       PS_PCIE_EP_RESET2_IO {PS_MIO 19} \
       PS_PCIE_RESET {ENABLE 1} \
       PS_PL_CONNECTIVITY_MODE {Custom} \
-      PS_TTC0_PERIPHERAL_ENABLE {1} \
       PS_UART0_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 42 .. 43}}} \
       PS_USB3_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 13 .. 25}}} \
       PS_USE_FPD_CCI_NOC {1} \
@@ -175,15 +175,14 @@ if {$is_vpk120 || $is_vpk180} {
 } elseif {$is_vek280} {
   set_property -dict [list \
     CONFIG.CLOCK_MODE {Custom} \
+    CONFIG.PS_BOARD_INTERFACE {Custom} \
     CONFIG.PS_PL_CONNECTIVITY_MODE {Custom} \
-    CONFIG.IO_CONFIG_MODE {Custom} \
     CONFIG.PS_PMC_CONFIG { \
       CLOCK_MODE {Custom} \
       DDR_MEMORY_MODE {Connectivity to DDR via NOC} \
       DEBUG_MODE {JTAG} \
       DESIGN_MODE {1} \
       DEVICE_INTEGRITY_MODE {Sysmon temperature voltage and external IO monitoring} \
-      IO_CONFIG_MODE {Custom} \
       PMC_CRP_PL0_REF_CTRL_FREQMHZ {100} \
       PMC_CRP_PL1_REF_CTRL_FREQMHZ {50} \
       PMC_GPIO0_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 25}}} \
@@ -191,13 +190,18 @@ if {$is_vpk120 || $is_vpk180} {
       PMC_GPIO_EMIO_PERIPHERAL_ENABLE {1} \
       PMC_MIO12 {{AUX_IO 0} {DIRECTION out} {DRIVE_STRENGTH 8mA} {OUTPUT_DATA default} {PULL pullup} {SCHMITT 0} {SLEW slow} {USAGE GPIO}} \
       PMC_MIO37 {{AUX_IO 0} {DIRECTION out} {DRIVE_STRENGTH 8mA} {OUTPUT_DATA high} {PULL pullup} {SCHMITT 0} {SLEW slow} {USAGE GPIO}} \
+      PMC_MIO38 {{AUX_IO 0} {DIRECTION out} {DRIVE_STRENGTH 8mA} {OUTPUT_DATA high} {PULL pullup} {SCHMITT 0} {SLEW slow} {USAGE GPIO}} \
       PMC_OSPI_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 11}} {MODE Single}} \
       PMC_REF_CLK_FREQMHZ {33.3333} \
       PMC_SD1 {{CD_ENABLE 1} {CD_IO {PMC_MIO 28}} {POW_ENABLE 1} {POW_IO {PMC_MIO 51}} {RESET_ENABLE 0} {RESET_IO {PMC_MIO 12}} {WP_ENABLE 0} {WP_IO {PMC_MIO 1}}} \
       PMC_SD1_PERIPHERAL {{CLK_100_SDR_OTAP_DLY 0x3} {CLK_200_SDR_OTAP_DLY 0x2} {CLK_50_DDR_ITAP_DLY 0x36} {CLK_50_DDR_OTAP_DLY 0x3} {CLK_50_SDR_ITAP_DLY 0x2C} {CLK_50_SDR_OTAP_DLY 0x4} {ENABLE 1} {IO {PMC_MIO 26 .. 36}}} \
       PMC_SD1_SLOT_TYPE {SD 3.0} \
       PMC_USE_PMC_NOC_AXI0 {1} \
-      PS_BOARD_INTERFACE {ps_pmc_fixed_io} \
+      PS_BOARD_INTERFACE {Custom} \
+      PS_CAN0_PERIPHERAL {{ENABLE 1} {IO {PS_MIO 14 .. 15}}} \
+      PS_CAN1_PERIPHERAL {{ENABLE 1} {IO {PS_MIO 16 .. 17}}} \
+      PS_CRL_CAN0_REF_CTRL_FREQMHZ {160} \
+      PS_CRL_CAN1_REF_CTRL_FREQMHZ {160} \
       PS_ENET0_MDIO {{ENABLE 1} {IO {PS_MIO 24 .. 25}}} \
       PS_ENET0_PERIPHERAL {{ENABLE 1} {IO {PS_MIO 0 .. 11}}} \
       PS_GEN_IPI0_ENABLE {1} \
@@ -222,7 +226,6 @@ if {$is_vpk120 || $is_vpk180} {
       PS_PCIE_EP_RESET2_IO {PS_MIO 19} \
       PS_PCIE_RESET {ENABLE 1} \
       PS_PL_CONNECTIVITY_MODE {Custom} \
-      PS_TTC0_PERIPHERAL_ENABLE {1} \
       PS_UART0_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 42 .. 43}}} \
       PS_USB3_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 13 .. 25}}} \
       PS_USE_FPD_CCI_NOC {1} \
@@ -233,7 +236,6 @@ if {$is_vpk120 || $is_vpk180} {
       PS_USE_PMCPL_CLK1 {1} \
       PS_USE_PMCPL_CLK2 {0} \
       PS_USE_PMCPL_CLK3 {0} \
-      PS_USE_S_AXI_FPD {0} \
       SMON_ALARMS {Set_Alarms_On} \
       SMON_ENABLE_TEMP_AVERAGING {0} \
       SMON_INTERFACE_TO_USE {I2C} \
@@ -244,15 +246,14 @@ if {$is_vpk120 || $is_vpk180} {
 } elseif {$is_vhk158} {
   set_property -dict [list \
     CONFIG.CLOCK_MODE {Custom} \
+    CONFIG.PS_BOARD_INTERFACE {Custom} \
     CONFIG.PS_PL_CONNECTIVITY_MODE {Custom} \
-    CONFIG.IO_CONFIG_MODE {Custom} \
     CONFIG.PS_PMC_CONFIG { \
       CLOCK_MODE {Custom} \
       DDR_MEMORY_MODE {Connectivity to DDR via NOC} \
       DEBUG_MODE {JTAG} \
       DESIGN_MODE {1} \
       DEVICE_INTEGRITY_MODE {Sysmon temperature voltage and external IO monitoring} \
-      IO_CONFIG_MODE {Custom} \
       PMC_CRP_PL0_REF_CTRL_FREQMHZ {100} \
       PMC_CRP_PL1_REF_CTRL_FREQMHZ {50} \
       PMC_GPIO0_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 25}}} \
@@ -266,7 +267,7 @@ if {$is_vpk120 || $is_vpk180} {
       PMC_SD1_PERIPHERAL {{CLK_100_SDR_OTAP_DLY 0x3} {CLK_200_SDR_OTAP_DLY 0x2} {CLK_50_DDR_ITAP_DLY 0x2A} {CLK_50_DDR_OTAP_DLY 0x3} {CLK_50_SDR_ITAP_DLY 0x25} {CLK_50_SDR_OTAP_DLY 0x4} {ENABLE 1} {IO {PMC_MIO 26 .. 36}}} \
       PMC_SD1_SLOT_TYPE {SD 3.0 AUTODIR} \
       PMC_USE_PMC_NOC_AXI0 {1} \
-      PS_BOARD_INTERFACE {ps_pmc_fixed_io} \
+      PS_BOARD_INTERFACE {Custom} \
       PS_ENET0_MDIO {{ENABLE 1} {IO {PS_MIO 24 .. 25}}} \
       PS_ENET0_PERIPHERAL {{ENABLE 1} {IO {PS_MIO 0 .. 11}}} \
       PS_GEN_IPI0_ENABLE {1} \
@@ -291,7 +292,6 @@ if {$is_vpk120 || $is_vpk180} {
       PS_PCIE_EP_RESET2_IO {PS_MIO 19} \
       PS_PCIE_RESET {ENABLE 1} \
       PS_PL_CONNECTIVITY_MODE {Custom} \
-      PS_TTC0_PERIPHERAL_ENABLE {1} \
       PS_UART0_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 42 .. 43}}} \
       PS_USB3_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 13 .. 25}}} \
       PS_USE_FPD_CCI_NOC {1} \
@@ -312,14 +312,13 @@ if {$is_vpk120 || $is_vpk180} {
 } else {
   set_property -dict [list \
     CONFIG.CLOCK_MODE {Custom} \
+    CONFIG.PS_BOARD_INTERFACE {Custom} \
     CONFIG.PS_PL_CONNECTIVITY_MODE {Custom} \
-    CONFIG.IO_CONFIG_MODE {Custom} \
     CONFIG.PS_PMC_CONFIG { \
       CLOCK_MODE {Custom} \
       DDR_MEMORY_MODE {Connectivity to DDR via NOC} \
       DEBUG_MODE {JTAG} \
       DESIGN_MODE {1} \
-      IO_CONFIG_MODE {Custom} \
       PMC_CRP_PL0_REF_CTRL_FREQMHZ {100} \
       PMC_CRP_PL1_REF_CTRL_FREQMHZ {50} \
       PMC_GPIO0_MIO_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 0 .. 25}}} \
@@ -339,7 +338,7 @@ if {$is_vpk120 || $is_vpk180} {
       PMC_SD1_PERIPHERAL {{CLK_100_SDR_OTAP_DLY 0x3} {CLK_200_SDR_OTAP_DLY 0x2} {CLK_50_DDR_ITAP_DLY 0x36} {CLK_50_DDR_OTAP_DLY 0x3} {CLK_50_SDR_ITAP_DLY 0x2C} {CLK_50_SDR_OTAP_DLY 0x4} {ENABLE 1} {IO {PMC_MIO 26 .. 36}}} \
       PMC_SD1_SLOT_TYPE {SD 3.0} \
       PMC_USE_PMC_NOC_AXI0 {1} \
-      PS_BOARD_INTERFACE {ps_pmc_fixed_io} \
+      PS_BOARD_INTERFACE {Custom} \
       PS_CAN1_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 40 .. 41}}} \
       PS_CRL_CAN1_REF_CTRL_FREQMHZ {160} \
       PS_ENET0_MDIO {{ENABLE 1} {IO {PS_MIO 24 .. 25}}} \
@@ -368,7 +367,6 @@ if {$is_vpk120 || $is_vpk180} {
       PS_PCIE_EP_RESET2_IO {PMC_MIO 39} \
       PS_PCIE_RESET {ENABLE 1} \
       PS_PL_CONNECTIVITY_MODE {Custom} \
-      PS_TTC0_PERIPHERAL_ENABLE {1} \
       PS_UART0_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 42 .. 43}}} \
       PS_USB3_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 13 .. 25}}} \
       PS_USE_FPD_CCI_NOC {1} \
@@ -518,8 +516,56 @@ foreach port $ports {
   connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxprogdivresetdone] [get_bd_pins axi_ethernet_${port}/gtwiz_reset_rx_done_in]
   connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_txprogdivresetdone] [get_bd_pins axi_ethernet_${port}/gtwiz_reset_tx_done_in]
   connect_bd_net [get_bd_pins gt_quad_base_0/gtpowergood] [get_bd_pins axi_ethernet_${port}/gtpowergood_in]
-  connect_bd_intf_net [get_bd_intf_pins gt_quad_base_0/RX${port}_GT_IP_Interface] [get_bd_intf_pins axi_ethernet_${port}/gt_rx_interface]
-  connect_bd_intf_net [get_bd_intf_pins gt_quad_base_0/TX${port}_GT_IP_Interface] [get_bd_intf_pins axi_ethernet_${port}/gt_tx_interface]
+  
+  connect_bd_net [get_bd_pins axi_ethernet_${port}/gtwiz_reset_rx_datapath_out] [get_bd_pins gt_quad_base_0/ch${port}_rxmstdatapathreset]
+  connect_bd_net [get_bd_pins axi_ethernet_${port}/rxpd_out] [get_bd_pins gt_quad_base_0/ch${port}_rxpd]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxbufstatus] [get_bd_pins axi_ethernet_${port}/rxbufstatus_in]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxctrl0] [get_bd_pins axi_ethernet_${port}/rxctrl0_in]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxctrl1] [get_bd_pins axi_ethernet_${port}/rxctrl1_in]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxctrl2] [get_bd_pins axi_ethernet_${port}/rxctrl2_in]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxctrl3] [get_bd_pins axi_ethernet_${port}/rxctrl3_in]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxclkcorcnt] [get_bd_pins axi_ethernet_${port}/rxclkcorcnt_in]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxresetdone] [get_bd_pins axi_ethernet_${port}/rxresetdone_in]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxpmaresetdone] [get_bd_pins axi_ethernet_${port}/rxpmaresetdone_in]
+
+  connect_bd_net [get_bd_pins axi_ethernet_${port}/txctrl0_out] [get_bd_pins gt_quad_base_0/ch${port}_txctrl0]
+  connect_bd_net [get_bd_pins axi_ethernet_${port}/txctrl1_out] [get_bd_pins gt_quad_base_0/ch${port}_txctrl1]
+  connect_bd_net [get_bd_pins axi_ethernet_${port}/txctrl2_out] [get_bd_pins gt_quad_base_0/ch${port}_txctrl2]
+  connect_bd_net [get_bd_pins axi_ethernet_${port}/txelecidle_out] [get_bd_pins gt_quad_base_0/ch${port}_txelecidle]
+  connect_bd_net [get_bd_pins axi_ethernet_${port}/txpd_out] [get_bd_pins gt_quad_base_0/ch${port}_txpd]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_txbufstatus] [get_bd_pins axi_ethernet_${port}/txbufstatus_in]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_txresetdone] [get_bd_pins axi_ethernet_${port}/txresetdone_in]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_txpmaresetdone] [get_bd_pins axi_ethernet_${port}/txpmaresetdone_in]
+
+  # RX DATA from GT Wiz is 128 bits wide going to 16 bit wide input - need slice
+  create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice rx_data_slice_${port}
+  set_property -dict [list \
+      CONFIG.DIN_WIDTH {128} \
+      CONFIG.DIN_FROM {15} \
+      CONFIG.DIN_TO {0} \
+      CONFIG.DOUT_WIDTH {16} \
+  ] [get_bd_cells rx_data_slice_${port}]
+  connect_bd_net [get_bd_pins gt_quad_base_0/ch${port}_rxdata] [get_bd_pins rx_data_slice_${port}/Din]
+  connect_bd_net [get_bd_pins rx_data_slice_${port}/Dout] [get_bd_pins axi_ethernet_${port}/gtwiz_userdata_rx_in]
+
+  # TX DATA output from AXI Eth is 16 bits wide to GT Wiz 128 bits input - need concat and const
+  create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat tx_data_concat_${port}
+  set_property -dict [list \
+      CONFIG.NUM_PORTS {2} \
+      CONFIG.IN0_WIDTH {16} \
+      CONFIG.IN1_WIDTH {112} \
+  ] [get_bd_cells tx_data_concat_${port}]
+  create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant const_zero_${port}
+  set_property -dict [list \
+      CONFIG.CONST_WIDTH {112} \
+      CONFIG.CONST_VAL {0} \
+  ] [get_bd_cells const_zero_${port}]
+  connect_bd_net [get_bd_pins axi_ethernet_${port}/gtwiz_userdata_tx_out] [get_bd_pins tx_data_concat_${port}/In0]
+  connect_bd_net [get_bd_pins const_zero_${port}/dout] [get_bd_pins tx_data_concat_${port}/In1]
+  connect_bd_net [get_bd_pins tx_data_concat_${port}/dout] [get_bd_pins gt_quad_base_0/ch${port}_txdata]
+
+  connect_bd_net [get_bd_pins axi_ethernet_${port}/gtwiz_reset_tx_datapath_out] [get_bd_pins gt_quad_base_0/ch${port}_txmstdatapathreset]
+
   connect_bd_net [get_bd_pins gt_quad_base_0/hsclk0_lcplllock] [get_bd_pins axi_ethernet_${port}/cplllock_in]
 
   # Add the DMA for the AXI Ethernet Subsystem
@@ -593,199 +639,39 @@ foreach port $ports {
 }
 
 # Configure the GT quad protocols
-set_property -dict [list \
-  CONFIG.PROT1_ENABLE.VALUE_MODE MANUAL \
-  CONFIG.PROT3_ENABLE.VALUE_MODE MANUAL \
-  CONFIG.PROT2_ENABLE.VALUE_MODE MANUAL \
-  CONFIG.PROT0_NO_OF_LANES.VALUE_MODE MANUAL \
+if {$is_vpk120 || $is_vpk180 || $is_vhk158 || $is_vek280} {
+  set_property -dict [list CONFIG.PROT1_PRESET.VALUE_MODE MANUAL \
+    CONFIG.PROT2_PRESET.VALUE_MODE MANUAL \
+    CONFIG.PROT3_PRESET.VALUE_MODE MANUAL \
+    CONFIG.PROT0_PRESET.VALUE_MODE MANUAL \
   ] [get_bd_cells gt_quad_base_0]
-set_property -dict [list \
-  CONFIG.PROT0_NO_OF_LANES {1} \
-  CONFIG.PROT1_ENABLE {true} \
-  CONFIG.PROT2_ENABLE {true} \
-  CONFIG.PROT3_ENABLE {true} \
-] [get_bd_cells gt_quad_base_0]
-set_property -dict [list \
-  CONFIG.PROT0_LR0_SETTINGS.VALUE_MODE MANUAL \
-  CONFIG.PROT1_LR0_SETTINGS.VALUE_MODE MANUAL \
-  CONFIG.PROT2_LR0_SETTINGS.VALUE_MODE MANUAL \
-  CONFIG.PROT3_LR0_SETTINGS.VALUE_MODE MANUAL \
+  set_property -dict [list \
+    CONFIG.PROT0_NO_OF_LANES {1} \
+    CONFIG.PROT0_PRESET {GTYP-Ethernet_1G} \
+    CONFIG.PROT1_ENABLE {true} \
+    CONFIG.PROT1_PRESET {GTYP-Ethernet_1G} \
+    CONFIG.PROT2_ENABLE {true} \
+    CONFIG.PROT2_PRESET {GTYP-Ethernet_1G} \
+    CONFIG.PROT3_ENABLE {true} \
+    CONFIG.PROT3_PRESET {GTYP-Ethernet_1G} \
   ] [get_bd_cells gt_quad_base_0]
-set protocol [list \
-  PRESET GTYP-Ethernet_1G \
-  RX_PAM_SEL NRZ \
-  TX_PAM_SEL NRZ \
-  TX_HD_EN 0 \
-  RX_HD_EN 0 \
-  RX_GRAY_BYP true \
-  TX_GRAY_BYP true \
-  RX_GRAY_LITTLEENDIAN true \
-  TX_GRAY_LITTLEENDIAN true \
-  RX_PRECODE_BYP true \
-  TX_PRECODE_BYP true \
-  RX_PRECODE_LITTLEENDIAN false \
-  TX_PRECODE_LITTLEENDIAN false \
-  INTERNAL_PRESET Ethernet_1G \
-  GT_TYPE GTYP \
-  GT_DIRECTION DUPLEX \
-  TX_LINE_RATE 1.25 \
-  TX_PLL_TYPE RPLL \
-  TX_REFCLK_FREQUENCY 125 \
-  TX_ACTUAL_REFCLK_FREQUENCY 125.000000000000 \
-  TX_FRACN_ENABLED false \
-  TX_FRACN_OVRD false \
-  TX_FRACN_NUMERATOR 0 \
-  TX_REFCLK_SOURCE R0 \
-  TX_DATA_ENCODING 8B10B \
-  TX_USER_DATA_WIDTH 16 \
-  TX_INT_DATA_WIDTH 20 \
-  TX_BUFFER_MODE 1 \
-  TX_BUFFER_BYPASS_MODE Fast_Sync \
-  TX_PIPM_ENABLE false \
-  TX_OUTCLK_SOURCE TXPROGDIVCLK \
-  TXPROGDIV_FREQ_ENABLE true \
-  TXPROGDIV_FREQ_SOURCE RPLL \
-  TXPROGDIV_FREQ_VAL 125.000 \
-  TX_DIFF_SWING_EMPH_MODE CUSTOM \
-  TX_64B66B_SCRAMBLER false \
-  TX_64B66B_ENCODER false \
-  TX_64B66B_CRC false \
-  TX_RATE_GROUP A \
-  RX_LINE_RATE 1.25 \
-  RX_PLL_TYPE RPLL \
-  RX_REFCLK_FREQUENCY 125 \
-  RX_ACTUAL_REFCLK_FREQUENCY 125.000000000000 \
-  RX_FRACN_ENABLED false \
-  RX_FRACN_OVRD false \
-  RX_FRACN_NUMERATOR 0 \
-  RX_REFCLK_SOURCE R0 \
-  RX_DATA_DECODING 8B10B \
-  RX_USER_DATA_WIDTH 16 \
-  RX_INT_DATA_WIDTH 20 \
-  RX_BUFFER_MODE 1 \
-  RX_OUTCLK_SOURCE RXPROGDIVCLK \
-  RXPROGDIV_FREQ_ENABLE true \
-  RXPROGDIV_FREQ_SOURCE RPLL \
-  RXPROGDIV_FREQ_VAL 62.500 \
-  RXRECCLK_FREQ_ENABLE true \
-  RXRECCLK_FREQ_VAL 500.000 \
-  INS_LOSS_NYQ 14 \
-  RX_EQ_MODE LPM \
-  RX_COUPLING AC \
-  RX_TERMINATION PROGRAMMABLE \
-  RX_RATE_GROUP A \
-  RX_TERMINATION_PROG_VALUE 800 \
-  RX_PPM_OFFSET 200 \
-  RX_64B66B_DESCRAMBLER false \
-  RX_64B66B_DECODER false \
-  RX_64B66B_CRC false \
-  OOB_ENABLE false \
-  RX_COMMA_ALIGN_WORD 2 \
-  RX_COMMA_SHOW_REALIGN_ENABLE true \
-  PCIE_ENABLE false \
-  TX_LANE_DESKEW_HDMI_ENABLE false \
-  RX_COMMA_P_ENABLE true \
-  RX_COMMA_M_ENABLE true \
-  RX_COMMA_DOUBLE_ENABLE false \
-  RX_COMMA_P_VAL 0101111100 \
-  RX_COMMA_M_VAL 1010000011 \
-  RX_COMMA_MASK 1111111111 \
-  RX_SLIDE_MODE OFF \
-  RX_SSC_PPM 0 \
-  RX_CB_NUM_SEQ 0 \
-  RX_CB_LEN_SEQ 1 \
-  RX_CB_MAX_SKEW 1 \
-  RX_CB_MAX_LEVEL 1 \
-  RX_CB_MASK_0_0 false \
-  RX_CB_VAL_0_0 00000000 \
-  RX_CB_K_0_0 false \
-  RX_CB_DISP_0_0 false \
-  RX_CB_MASK_0_1 false \
-  RX_CB_VAL_0_1 00000000 \
-  RX_CB_K_0_1 false \
-  RX_CB_DISP_0_1 false \
-  RX_CB_MASK_0_2 false \
-  RX_CB_VAL_0_2 00000000 \
-  RX_CB_K_0_2 false \
-  RX_CB_DISP_0_2 false \
-  RX_CB_MASK_0_3 false \
-  RX_CB_VAL_0_3 00000000 \
-  RX_CB_K_0_3 false \
-  RX_CB_DISP_0_3 false \
-  RX_CB_MASK_1_0 false \
-  RX_CB_VAL_1_0 00000000 \
-  RX_CB_K_1_0 false \
-  RX_CB_DISP_1_0 false \
-  RX_CB_MASK_1_1 false \
-  RX_CB_VAL_1_1 00000000 \
-  RX_CB_K_1_1 false \
-  RX_CB_DISP_1_1 false \
-  RX_CB_MASK_1_2 false \
-  RX_CB_VAL_1_2 00000000 \
-  RX_CB_K_1_2 false \
-  RX_CB_DISP_1_2 false \
-  RX_CB_MASK_1_3 false \
-  RX_CB_VAL_1_3 00000000 \
-  RX_CB_K_1_3 false \
-  RX_CB_DISP_1_3 false \
-  RX_CC_NUM_SEQ 0 \
-  RX_CC_LEN_SEQ 1 \
-  RX_CC_PERIODICITY 5000 \
-  RX_CC_KEEP_IDLE DISABLE \
-  RX_CC_PRECEDENCE ENABLE \
-  RX_CC_REPEAT_WAIT 0 \
-  RX_CC_VAL 00000000000000000000000000000000000000000000000000000000000000000000000000000000 \
-  RX_CC_MASK_0_0 false \
-  RX_CC_VAL_0_0 00000000 \
-  RX_CC_K_0_0 false \
-  RX_CC_DISP_0_0 false \
-  RX_CC_MASK_0_1 false \
-  RX_CC_VAL_0_1 00000000 \
-  RX_CC_K_0_1 false \
-  RX_CC_DISP_0_1 false \
-  RX_CC_MASK_0_2 false \
-  RX_CC_VAL_0_2 00000000 \
-  RX_CC_K_0_2 false \
-  RX_CC_DISP_0_2 false \
-  RX_CC_MASK_0_3 false \
-  RX_CC_VAL_0_3 00000000 \
-  RX_CC_K_0_3 false \
-  RX_CC_DISP_0_3 false \
-  RX_CC_MASK_1_0 false \
-  RX_CC_VAL_1_0 00000000 \
-  RX_CC_K_1_0 false \
-  RX_CC_DISP_1_0 false \
-  RX_CC_MASK_1_1 false \
-  RX_CC_VAL_1_1 00000000 \
-  RX_CC_K_1_1 false \
-  RX_CC_DISP_1_1 false \
-  RX_CC_MASK_1_2 false \
-  RX_CC_VAL_1_2 00000000 \
-  RX_CC_K_1_2 false \
-  RX_CC_DISP_1_2 false \
-  RX_CC_MASK_1_3 false \
-  RX_CC_VAL_1_3 00000000 \
-  RX_CC_K_1_3 false \
-  RX_CC_DISP_1_3 false \
-  PCIE_USERCLK2_FREQ 250 \
-  PCIE_USERCLK_FREQ 250 \
-  RX_JTOL_FC 0.74985 \
-  RX_JTOL_LF_SLOPE -20 \
-  RX_BUFFER_BYPASS_MODE Fast_Sync \
-  RX_BUFFER_BYPASS_MODE_LANE MULTI \
-  RX_BUFFER_RESET_ON_CB_CHANGE ENABLE \
-  RX_BUFFER_RESET_ON_COMMAALIGN DISABLE \
-  RX_BUFFER_RESET_ON_RATE_CHANGE ENABLE \
-  TX_BUFFER_RESET_ON_RATE_CHANGE ENABLE \
-  RESET_SEQUENCE_INTERVAL 0 \
-  RX_COMMA_PRESET K28.5 \
-  RX_COMMA_VALID_ONLY 0]
-set_property -dict [list \
-  CONFIG.PROT0_LR0_SETTINGS $protocol \
-  CONFIG.PROT1_LR0_SETTINGS $protocol \
-  CONFIG.PROT2_LR0_SETTINGS $protocol \
-  CONFIG.PROT3_LR0_SETTINGS $protocol \
-] [get_bd_cells gt_quad_base_0]
+} else {
+  set_property -dict [list CONFIG.PROT1_PRESET.VALUE_MODE MANUAL \
+    CONFIG.PROT2_PRESET.VALUE_MODE MANUAL \
+    CONFIG.PROT3_PRESET.VALUE_MODE MANUAL \
+    CONFIG.PROT0_PRESET.VALUE_MODE MANUAL \
+  ] [get_bd_cells gt_quad_base_0]
+  set_property -dict [list \
+    CONFIG.PROT0_NO_OF_LANES {1} \
+    CONFIG.PROT0_PRESET {GTY-Ethernet_1G} \
+    CONFIG.PROT1_ENABLE {true} \
+    CONFIG.PROT1_PRESET {GTY-Ethernet_1G} \
+    CONFIG.PROT2_ENABLE {true} \
+    CONFIG.PROT2_PRESET {GTY-Ethernet_1G} \
+    CONFIG.PROT3_ENABLE {true} \
+    CONFIG.PROT3_PRESET {GTY-Ethernet_1G} \
+  ] [get_bd_cells gt_quad_base_0]
+}
 
 connect_bd_net [get_bd_pins util_ds_buf_0/IBUF_OUT] [get_bd_pins gt_quad_base_0/GT_REFCLK1]
 
