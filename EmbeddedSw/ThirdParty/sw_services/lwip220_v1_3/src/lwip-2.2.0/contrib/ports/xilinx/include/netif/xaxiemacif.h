@@ -74,6 +74,7 @@ err_t 	xaxiemacif_init(struct netif *netif);
 int 	xaxiemacif_input(struct netif *netif);
 
 unsigned get_IEEE_phy_speed(XAxiEthernet *xaxiemacp, XAxiEthernet *xaxiemacp_mdio, u32 ext_phy_addr);
+void enable_sgmii_clock(XAxiEthernet *xaxiemacp);
 unsigned configure_IEEE_phy_speed(XAxiEthernet *xaxiemacp, XAxiEthernet *xaxiemacp_mdio, u32 phy_addr, unsigned speed);
 unsigned phy_setup_axiemac (XAxiEthernet *xaxiemacp);
 

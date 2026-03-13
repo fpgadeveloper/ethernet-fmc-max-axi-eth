@@ -29,6 +29,12 @@
  *
  * Opsero Electronic Design Inc. 2024
  * This code has been modified to work with the Opsero Ethernet FMC Max (OP080).
+ *
+ * Ethernet FMC Max shared MDIO bus:
+ *   Only PORT0's AXI Ethernet is connected to the external MDIO bus.
+ *   All PHY reads/writes must be routed through PORT0's instance.
+ *   Functions that access the PHY take an extra xaxiemacp_mdio parameter
+ *   for the MDIO bus owner, while xaxiemacp is used for MAC feature detection.
  */
 
 #include "netif/xaxiemacif.h"
@@ -107,9 +113,11 @@
 
 extern u32_t phyaddrforemac;
 
+/* --- Ethernet FMC Max: shared MDIO bus infrastructure --- */
+
 #define NUM_PORTS XPAR_XAXIETHERNET_NUM_INSTANCES
 
-// Array to store base addresses
+/* Base addresses for port-number lookup */
 uint32_t base_addresses[NUM_PORTS] = {
 #if NUM_PORTS > 0
     XPAR_AXI_ETHERNET_0_BASEADDR,
@@ -125,14 +133,38 @@ uint32_t base_addresses[NUM_PORTS] = {
 #endif
 };
 
-// AXI Ethernet instance with MDIO bus
+/* AXI Ethernet instance used for MDIO bus access (PORT0 is the bus owner) */
 XAxiEthernet axieth_mdio_inst;
 XAxiEthernet *axieth_mdio = &axieth_mdio_inst;
-// External PHY addresses on Ethernet FMC Max
-const u16 extphyaddr[] = {0x1,0x3,0xC,0xF};
-// SGMII PHY addresses determined in Vivado design
-const u16 sgmiiphyaddr[] = {0x2,0x4,0xD,0xE};
 
+/*
+ * External (copper-side) PHY addresses on Ethernet FMC Max (OP080).
+ * These are set by resistor strapping on the board and are NOT exported
+ * to xparameters.h. If the board is revised with different strapping,
+ * update these values to match.
+ */
+const u16 extphyaddr[] = {0x1, 0x3, 0xC, 0xF};
+
+/*
+ * SGMII PHY addresses — configured in the Vivado block design and
+ * exported to xparameters.h as XPAR_AXI_ETHERNET_N_PHYADDR.
+ */
+const u16 sgmiiphyaddr[NUM_PORTS] = {
+#if NUM_PORTS > 0
+    XPAR_AXI_ETHERNET_0_PHYADDR,
+#endif
+#if NUM_PORTS > 1
+    XPAR_AXI_ETHERNET_1_PHYADDR,
+#endif
+#if NUM_PORTS > 2
+    XPAR_AXI_ETHERNET_2_PHYADDR,
+#endif
+#if NUM_PORTS > 3
+    XPAR_AXI_ETHERNET_3_PHYADDR
+#endif
+};
+
+/* --- end shared MDIO infrastructure --- */
 
 static void __attribute__ ((noinline)) AxiEthernetUtilPhyDelay(unsigned int Seconds);
 
@@ -377,6 +409,39 @@ unsigned int get_phy_negotiated_speed (XAxiEthernet *xaxiemacp, XAxiEthernet *xa
 	}
 }
 
+unsigned int get_phy_speed_TI_DP83867(XAxiEthernet *xaxiemacp, XAxiEthernet *xaxiemacp_mdio, u32 phy_addr)
+{
+	u16 phy_val;
+	u16 control;
+
+	xil_printf("Start PHY autonegotiation \r\n");
+
+	/* Changing the PHY RX and TX DELAY settings. */
+	XAxiEthernet_PhyReadExtended(xaxiemacp_mdio, phy_addr, DP83867_R32_RGMIICTL1, &phy_val);
+	phy_val |= DP83867_RGMII_CLOCK_DELAY_CTRL_MASK;
+	XAxiEthernet_PhyWriteExtended(xaxiemacp_mdio, phy_addr, DP83867_R32_RGMIICTL1, phy_val);
+
+	XAxiEthernet_PhyReadExtended(xaxiemacp_mdio, phy_addr, DP83867_R86_RGMIIDCTL, &phy_val);
+	phy_val &= 0xFF00;
+	phy_val |= DP83867_RGMII_TX_CLOCK_DELAY_MASK;
+	phy_val |= DP83867_RGMII_RX_CLOCK_DELAY_MASK;
+	XAxiEthernet_PhyWriteExtended(xaxiemacp_mdio, phy_addr, DP83867_R86_RGMIIDCTL, phy_val);
+
+	/* Set advertised speeds for 10/100/1000Mbps modes. */
+	XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_AUTONEGO_ADVERTISE_REG, &control);
+	control |= IEEE_ASYMMETRIC_PAUSE_MASK;
+	control |= IEEE_PAUSE_MASK;
+	control |= ADVERTISE_100;
+	control |= ADVERTISE_10;
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_AUTONEGO_ADVERTISE_REG, control);
+
+	XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_1000_ADVERTISE_REG_OFFSET, &control);
+	control |= ADVERTISE_1000;
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_1000_ADVERTISE_REG_OFFSET, control);
+
+	return get_phy_negotiated_speed(xaxiemacp, xaxiemacp_mdio, phy_addr);
+}
+
 unsigned int get_phy_speed_TI_DP83867_SGMII(XAxiEthernet *xaxiemacp, XAxiEthernet *xaxiemacp_mdio, u32 phy_addr)
 {
 	u16 control;
@@ -385,10 +450,20 @@ unsigned int get_phy_speed_TI_DP83867_SGMII(XAxiEthernet *xaxiemacp, XAxiEtherne
 
 	xil_printf("Start TI PHY autonegotiation\r\n");
 
-	/* Enable Mirror mode for Ethernet FMC Max */
+	/* Enable Mirror mode for Ethernet FMC Max shared MDIO bus */
 	XAxiEthernet_PhyReadExtended(xaxiemacp_mdio, phy_addr, TI_PHY_REGCFG4, &temp);
 	temp |= TI_PHY_PORT_MIRROR_EN;
 	XAxiEthernet_PhyWriteExtended(xaxiemacp_mdio, phy_addr, TI_PHY_REGCFG4, temp);
+
+	/* Enable SGMII Clock */
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, TI_PHY_REGCR,
+			      TI_PHY_REGCR_DEVAD_EN);
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, TI_PHY_ADDDR,
+			      TI_PHY_SGMIITYPE);
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, TI_PHY_REGCR,
+			      TI_PHY_REGCR_DEVAD_EN | TI_PHY_REGCR_DEVAD_DATAEN);
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, TI_PHY_ADDDR,
+			      TI_PHY_SGMIICLK_EN);
 
 	XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_CONTROL_REG_OFFSET,
 			     &control);
@@ -444,6 +519,132 @@ unsigned int get_phy_speed_TI_DP83867_SGMII(XAxiEthernet *xaxiemacp, XAxiEtherne
 	return get_phy_negotiated_speed(xaxiemacp, xaxiemacp_mdio, phy_addr);
 }
 
+unsigned int get_phy_speed_88E1116R(XAxiEthernet *xaxiemacp, XAxiEthernet *xaxiemacp_mdio, u32 phy_addr)
+{
+	u16 phy_val;
+	u16 control;
+	u16 status;
+	u16 partner_capabilities;
+
+	xil_printf("Start PHY autonegotiation \r\n");
+
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_PAGE_ADDRESS_REGISTER, 2);
+	XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_CONTROL_REG_MAC, &control);
+	control |= IEEE_RGMII_TXRX_CLOCK_DELAYED_MASK;
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_CONTROL_REG_MAC, control);
+
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_PAGE_ADDRESS_REGISTER, 0);
+
+	XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_AUTONEGO_ADVERTISE_REG, &control);
+	control |= IEEE_ASYMMETRIC_PAUSE_MASK;
+	control |= IEEE_PAUSE_MASK;
+	control |= ADVERTISE_100;
+	control |= ADVERTISE_10;
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_AUTONEGO_ADVERTISE_REG, control);
+
+	XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_1000_ADVERTISE_REG_OFFSET,
+				&control);
+	control |= ADVERTISE_1000;
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_1000_ADVERTISE_REG_OFFSET,
+				control);
+
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_PAGE_ADDRESS_REGISTER, 0);
+	XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_COPPER_SPECIFIC_CONTROL_REG,
+				&control);
+	control |= (7 << 12);	/* max number of gigabit attempts */
+	control |= (1 << 11);	/* enable downshift */
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_COPPER_SPECIFIC_CONTROL_REG,
+				control);
+
+	XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_CONTROL_REG_OFFSET, &control);
+	control |= IEEE_CTRL_AUTONEGOTIATE_ENABLE;
+	control |= IEEE_STAT_AUTONEGOTIATE_RESTART;
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_CONTROL_REG_OFFSET, control);
+
+	XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_CONTROL_REG_OFFSET, &control);
+	control |= IEEE_CTRL_RESET_MASK;
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_CONTROL_REG_OFFSET, control);
+	while (1) {
+		XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_CONTROL_REG_OFFSET, &control);
+		if (control & IEEE_CTRL_RESET_MASK)
+			continue;
+		else
+			break;
+	}
+
+	xil_printf("Waiting for PHY to complete autonegotiation.\r\n");
+
+	XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_STATUS_REG_OFFSET, &status);
+	while ( !(status & IEEE_STAT_AUTONEGOTIATE_COMPLETE) ) {
+		AxiEthernetUtilPhyDelay(1);
+		XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_COPPER_SPECIFIC_STATUS_REG_2,
+							&phy_val);
+		if (phy_val & IEEE_AUTONEG_ERROR_MASK) {
+			xil_printf("Auto negotiation error \r\n");
+		}
+		XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_STATUS_REG_OFFSET,
+					&status);
+	}
+
+	xil_printf("autonegotiation complete \r\n");
+
+	XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_SPECIFIC_STATUS_REG,
+				&partner_capabilities);
+	if ( ((partner_capabilities >> 14) & 3) == 2)/* 1000Mbps */
+		return 1000;
+	else if ( ((partner_capabilities >> 14) & 3) == 1)/* 100Mbps */
+		return 100;
+	else					/* 10Mbps */
+		return 10;
+}
+
+
+unsigned int get_phy_speed_88E1111 (XAxiEthernet *xaxiemacp, XAxiEthernet *xaxiemacp_mdio, u32 phy_addr)
+{
+	u16 control;
+	int TimeOut;
+	u16 phy_val;
+
+#ifndef SDT
+	if (XAxiEthernet_GetPhysicalInterface(xaxiemacp) ==
+#else
+	if (XAxiEthernet_Get_Phy_Interface(xaxiemacp) ==
+#endif
+							XAE_PHY_TYPE_RGMII_2_0) {
+		XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr,
+						IEEE_EXT_PHY_SPECIFIC_CONTROL_REG, &phy_val);
+		phy_val |= PHY_88E1111_RGMII_RX_CLOCK_DELAYED_MASK;
+		XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr,
+						IEEE_EXT_PHY_SPECIFIC_CONTROL_REG, phy_val);
+
+		XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_CONTROL_REG_OFFSET,
+													&control);
+		XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_CONTROL_REG_OFFSET,
+                                        control | IEEE_CTRL_RESET_MASK);
+
+		TimeOut = RESET_TIMEOUT;
+		while (TimeOut) {
+				XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr,
+									IEEE_CONTROL_REG_OFFSET, &control);
+			if (!(control & IEEE_CTRL_RESET_MASK))
+				break;
+			TimeOut -= 1;
+		}
+
+		if (!TimeOut) {
+			xil_printf("%s: Phy Reset failed\n\r", __FUNCTION__);
+			return 0;
+		}
+	}
+
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_1000_ADVERTISE_REG_OFFSET,
+															ADVERTISE_1000);
+	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, IEEE_AUTONEGO_ADVERTISE_REG,
+														ADVERTISE_100_AND_10);
+
+	return get_phy_negotiated_speed(xaxiemacp, xaxiemacp_mdio, phy_addr);
+}
+
 unsigned get_IEEE_phy_speed(XAxiEthernet *xaxiemacp, XAxiEthernet *xaxiemacp_mdio, u32 ext_phy_addr)
 {
 	u16 phy_identifier;
@@ -458,7 +659,15 @@ unsigned get_IEEE_phy_speed(XAxiEthernet *xaxiemacp, XAxiEthernet *xaxiemacp_mdi
 
 /* Depending upon what manufacturer PHY is connected, a different mask is
  * needed to determine the specific model number of the PHY. */
-	if (phy_identifier == TI_PHY_IDENTIFIER) {
+	if (phy_identifier == MARVEL_PHY_IDENTIFIER) {
+		phy_model = phy_model & MARVEL_PHY_MODEL_NUM_MASK;
+
+		if (phy_model == MARVEL_PHY_88E1116R_MODEL) {
+			return get_phy_speed_88E1116R(xaxiemacp, xaxiemacp_mdio, phy_addr);
+		} else if (phy_model == MARVEL_PHY_88E1111_MODEL) {
+			return get_phy_speed_88E1111(xaxiemacp, xaxiemacp_mdio, phy_addr);
+		}
+	} else if (phy_identifier == TI_PHY_IDENTIFIER) {
 		phy_model = phy_model & TI_PHY_DP83867_MODEL;
 #ifndef SDT
 		phytype = XAxiEthernet_GetPhysicalInterface(xaxiemacp);
@@ -469,6 +678,9 @@ unsigned get_IEEE_phy_speed(XAxiEthernet *xaxiemacp, XAxiEthernet *xaxiemacp_mdi
 			return get_phy_speed_TI_DP83867_SGMII(xaxiemacp, xaxiemacp_mdio, phy_addr);
 		}
 
+		if (phy_model == TI_PHY_DP83867_MODEL) {
+			return get_phy_speed_TI_DP83867(xaxiemacp, xaxiemacp_mdio, phy_addr);
+		}
 	}
 	else {
 	    LWIP_DEBUGF(NETIF_DEBUG, ("XAxiEthernet get_IEEE_phy_speed: Detected PHY with unknown identifier/model.\r\n"));
@@ -476,6 +688,8 @@ unsigned get_IEEE_phy_speed(XAxiEthernet *xaxiemacp, XAxiEthernet *xaxiemacp_mdi
 	if (isphy_pcspma(xaxiemacp_mdio, phy_addr)) {
 		return get_phy_negotiated_speed(xaxiemacp, xaxiemacp_mdio, phy_addr);
 	}
+
+	return 0;
 }
 
 unsigned configure_IEEE_phy_speed(XAxiEthernet *xaxiemacp, XAxiEthernet *xaxiemacp_mdio, u32 phy_addr, unsigned speed)
@@ -560,41 +774,41 @@ unsigned configure_IEEE_phy_speed(XAxiEthernet *xaxiemacp, XAxiEthernet *xaxiema
 }
 
 /*
- * The purpose of this function is to instantiate the AXI Ethernet for PORT0 of
- * the Ethernet FMC Max in the case that we are running the echo server on
- * ONE OF THE OTHER PORTS (1,2 or 3, hence it has not already been instantiated).
- * We need the AXI Ethernet instance of PORT0 because it is the one that is
- * physically connected to the external MDIO bus and we need to make all PHY reads
- * and writes through this instance.
+ * Initialize the AXI Ethernet instance for PORT0 of the Ethernet FMC Max,
+ * when the echo server is running on a different port (1, 2, or 3).
+ * PORT0 is the only port physically connected to the external MDIO bus,
+ * so all PHY reads/writes must go through this instance.
  */
 void init_axiemac_port0(unsigned char *mac_eth_addr)
 {
 	unsigned options;
-	XAxiEthernet_Config *mac_config;
+	XAxiEthernet_Config *mac_config = NULL;
 	extern XAxiEthernet_Config XAxiEthernet_ConfigTable[];
 
-	/* obtain config of this emac */
-	mac_config = &XAxiEthernet_ConfigTable[0];
+	/* Look up PORT0 config by base address rather than assuming index 0 */
+	for (int i = 0; i < NUM_PORTS; i++) {
+		if (XAxiEthernet_ConfigTable[i].BaseAddress == XPAR_AXI_ETHERNET_0_BASEADDR) {
+			mac_config = &XAxiEthernet_ConfigTable[i];
+			break;
+		}
+	}
+	if (mac_config == NULL) {
+		xil_printf("ERROR: Could not find AXI Ethernet 0 config for MDIO bus\r\n");
+		return;
+	}
 
 	XAxiEthernet_CfgInitialize(axieth_mdio, mac_config, mac_config->BaseAddress);
 
 	options = XAxiEthernet_GetOptions(axieth_mdio);
-	// Disable recognize flow control frames
 	options &= ~XAE_FLOW_CONTROL_OPTION;
-	//options |= XAE_FLOW_CONTROL_OPTION;
 #ifdef USE_JUMBO_FRAMES
 	options |= XAE_JUMBO_OPTION;
 #endif
 	options |= XAE_TRANSMITTER_ENABLE_OPTION;
 	options |= XAE_RECEIVER_ENABLE_OPTION;
-	// Disable FCS strip
 	options &= ~XAE_FCS_STRIP_OPTION;
-	// Disable FCS insert (we have included it in the frame)
 	options &= ~XAE_FCS_INSERT_OPTION;
-	//options |= XAE_FCS_INSERT_OPTION;
 	options |= XAE_MULTICAST_OPTION;
-	// Using promiscuous option to disable mac address filtering
-	// and allow the loopback to function.
 	options |= XAE_PROMISC_OPTION;
 	XAxiEthernet_SetOptions(axieth_mdio, options);
 	XAxiEthernet_ClearOptions(axieth_mdio, ~options);
@@ -612,21 +826,31 @@ unsigned phy_setup_axiemac (XAxiEthernet *xaxiemacp)
 	u32 phy_addr;
 	unsigned char mac_ethernet_address[] = { 0x00, 0x0a, 0x35, 0x00, 0x01, 0x02 };
 
-	// Determine the enabled port number
-	port_num = 0;  // Default port number
+	/* Determine the port number from the MAC base address */
+	port_num = 0;
+	int port_found = 0;
 	for (int i = 0; i < NUM_PORTS; i++) {
 	    if (xaxiemacp->Config.BaseAddress == base_addresses[i]) {
 	        port_num = i;
+	        port_found = 1;
 	        break;
 	    }
+	}
+	if (!port_found) {
+		xil_printf("WARNING: MAC base address 0x%lx not found in port table, defaulting to port 0\r\n",
+			   (unsigned long)xaxiemacp->Config.BaseAddress);
+	}
+
+	if (port_num >= sizeof(extphyaddr)/sizeof(extphyaddr[0])) {
+		xil_printf("ERROR: port_num %d exceeds PHY address table size\r\n", port_num);
+		return 0;
 	}
 
 	phy_addr = extphyaddr[port_num];
 
 	xil_printf("Targeting PORT%d of the Ethernet FMC Max, External PHY address %d\r\n", port_num, phy_addr);
 
-	// If enabled port is not 0, then we need to initialize the XAxiEthernet instance
-	// for PORT0, so that we can use it to access the MDIO bus
+	/* If enabled port is not 0, initialize PORT0's AXI Ethernet for MDIO access */
 	if(port_num != 0)
 		init_axiemac_port0(mac_ethernet_address);
 	else
@@ -719,3 +943,39 @@ static void __attribute__ ((noinline)) AxiEthernetUtilPhyDelay(unsigned int Seco
 #endif
 }
 
+void enable_sgmii_clock(XAxiEthernet *xaxiemacp)
+{
+	u16 phy_identifier;
+	u16 phy_model;
+	u8 phytype;
+
+	/* Use the MDIO bus owner if it has been initialized, otherwise
+	 * use the passed-in instance (works when called for port 0). */
+	XAxiEthernet *mdio = axieth_mdio ? axieth_mdio : xaxiemacp;
+
+	XAxiEthernet_PhySetMdioDivisor(mdio, XAE_MDIO_DIV_DFT);
+	u32 phy_addr = detect_phy(mdio);
+	/* Get the PHY Identifier and Model number */
+	XAxiEthernet_PhyRead(mdio, phy_addr, PHY_IDENTIFIER_1_REG, &phy_identifier);
+	XAxiEthernet_PhyRead(mdio, phy_addr, PHY_IDENTIFIER_2_REG, &phy_model);
+
+	if (phy_identifier == TI_PHY_IDENTIFIER) {
+		phy_model = phy_model & TI_PHY_DP83867_MODEL;
+#ifndef SDT
+		phytype = XAxiEthernet_GetPhysicalInterface(xaxiemacp);
+#else
+		phytype = XAxiEthernet_Get_Phy_Interface(xaxiemacp);
+#endif
+		if (phy_model == TI_PHY_DP83867_MODEL && phytype == XAE_PHY_TYPE_SGMII) {
+			/* Enable SGMII Clock by switching to 6-wire mode */
+			XAxiEthernet_PhyWrite(mdio, phy_addr, TI_PHY_REGCR,
+					      TI_PHY_REGCR_DEVAD_EN);
+			XAxiEthernet_PhyWrite(mdio, phy_addr, TI_PHY_ADDDR,
+					      TI_PHY_SGMIITYPE);
+			XAxiEthernet_PhyWrite(mdio, phy_addr, TI_PHY_REGCR,
+					      TI_PHY_REGCR_DEVAD_EN | TI_PHY_REGCR_DEVAD_DATAEN);
+			XAxiEthernet_PhyWrite(mdio, phy_addr, TI_PHY_ADDDR,
+					      TI_PHY_SGMIICLK_EN);
+		}
+	}
+}
