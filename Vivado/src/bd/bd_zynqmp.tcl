@@ -133,9 +133,11 @@ foreach port $ports {
   set phy_addr [lindex $sgmii_phy_addr $port]
 
   # Configure the AXI Ethernet IP
+  # SGMII and Full checksum offload in all cases
   if {$port == $port_with_shared_logic} {
     set_property -dict [list CONFIG.PHYADDR $phy_addr \
                               CONFIG.PHY_TYPE {SGMII} \
+			      CONFIG.RXCSUM {Full} CONFIG.TXCSUM {Full} \
                               CONFIG.gtlocation $gt_loc \
                               CONFIG.SupportLevel {1} \
                               ] [get_bd_cells axi_ethernet_$port]
@@ -150,6 +152,7 @@ foreach port $ports {
   } else {
     set_property -dict [list CONFIG.PHYADDR $phy_addr \
                               CONFIG.PHY_TYPE {SGMII} \
+			      CONFIG.RXCSUM {Full} CONFIG.TXCSUM {Full} \
                               CONFIG.gtlocation $gt_loc \
                               CONFIG.SupportLevel {0} \
                               ] [get_bd_cells axi_ethernet_$port]
