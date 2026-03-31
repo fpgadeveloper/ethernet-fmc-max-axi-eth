@@ -450,20 +450,10 @@ unsigned int get_phy_speed_TI_DP83867_SGMII(XAxiEthernet *xaxiemacp, XAxiEtherne
 
 	xil_printf("Start TI PHY autonegotiation\r\n");
 
-	/* Enable Mirror mode for Ethernet FMC Max shared MDIO bus */
+	/* Enable Mirror mode for Ethernet FMC Max */
 	XAxiEthernet_PhyReadExtended(xaxiemacp_mdio, phy_addr, TI_PHY_REGCFG4, &temp);
 	temp |= TI_PHY_PORT_MIRROR_EN;
 	XAxiEthernet_PhyWriteExtended(xaxiemacp_mdio, phy_addr, TI_PHY_REGCFG4, temp);
-
-	/* Enable SGMII Clock */
-	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, TI_PHY_REGCR,
-			      TI_PHY_REGCR_DEVAD_EN);
-	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, TI_PHY_ADDDR,
-			      TI_PHY_SGMIITYPE);
-	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, TI_PHY_REGCR,
-			      TI_PHY_REGCR_DEVAD_EN | TI_PHY_REGCR_DEVAD_DATAEN);
-	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, TI_PHY_ADDDR,
-			      TI_PHY_SGMIICLK_EN);
 
 	XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr, IEEE_CONTROL_REG_OFFSET,
 			     &control);
@@ -490,8 +480,10 @@ unsigned int get_phy_speed_TI_DP83867_SGMII(XAxiEthernet *xaxiemacp, XAxiEtherne
 			      TI_PHY_REGCR_DEVAD_EN | TI_PHY_REGCR_DEVAD_DATAEN);
 	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, TI_PHY_ADDDR, 0);
 
+	/* Set SGMII mode in PHY Control register (read-modify-write) */
 	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, TI_PHY_PHYCTRL,
 			      TI_PHY_CR_SGMII_EN);
+
 
 	xil_printf("Waiting for Link to be up \r\n");
 	XAxiEthernet_PhyRead(xaxiemacp_mdio, phy_addr,
@@ -515,6 +507,7 @@ unsigned int get_phy_speed_TI_DP83867_SGMII(XAxiEthernet *xaxiemacp, XAxiEtherne
 	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, TI_PHY_ADDDR, TI_PHY_REGCFG4);
 	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, TI_PHY_REGCR, TI_PHY_REGCR_DATA);
 	XAxiEthernet_PhyWrite(xaxiemacp_mdio, phy_addr, TI_PHY_ADDDR, phyregtemp);
+	
 
 	return get_phy_negotiated_speed(xaxiemacp, xaxiemacp_mdio, phy_addr);
 }
@@ -819,12 +812,62 @@ void init_axiemac_port0(unsigned char *mac_eth_addr)
 	XAxiEthernet_PhySetMdioDivisor(axieth_mdio, XAE_MDIO_DIV_DFT);
 }
 
+/*
+ * Release all Ethernet FMC Max PHYs from reset on Versal.
+ * PHY reset is active-low, directly driven by PMC GPIO EMIO bits 0-3
+ * (one per port).  On Versal these are Bank 3 of the PMC GPIO controller.
+ * This must be called once before any MDIO access.
+ */
+#if defined(versal) || defined(VERSAL_NET)
+#include "xil_io.h"
+#include "sleep.h"
+#define PMC_GPIO_BASE        0xF1020000U
+#define PMC_GPIO_EMIO_BANK   3U
+static void release_phy_reset(void)
+{
+	static int done = 0;
+	u32 dirm, oen;
+	if (done) return;
+	done = 1;
+
+	/* EMIO bits 0-3 → PHY reset for ports 0-3 */
+	const u32 mask = 0x0FU;
+	const u32 bank_off = PMC_GPIO_EMIO_BANK * 0x40U;
+
+	/* Set bits 0-3 as output */
+	dirm = Xil_In32(PMC_GPIO_BASE + 0x204U + bank_off);
+	Xil_Out32(PMC_GPIO_BASE + 0x204U + bank_off, dirm | mask);
+
+	/* Enable output driver */
+	oen = Xil_In32(PMC_GPIO_BASE + 0x208U + bank_off);
+	Xil_Out32(PMC_GPIO_BASE + 0x208U + bank_off, oen | mask);
+
+	/* Drive LOW (assert reset) using masked-write register:
+	 * bits [31:16] = mask (0 = modify), bits [15:0] = data */
+	Xil_Out32(PMC_GPIO_BASE + (PMC_GPIO_EMIO_BANK * 0x08U),
+		  (~mask & 0xFFFFU) << 16 | 0U);
+	xil_printf("PHY reset asserted (PMC GPIO EMIO bits 0-3 LOW)\r\n");
+	usleep(10000);
+
+	/* Drive HIGH (release reset) */
+	Xil_Out32(PMC_GPIO_BASE + (PMC_GPIO_EMIO_BANK * 0x08U),
+		  (~mask & 0xFFFFU) << 16 | mask);
+	xil_printf("PHY reset released (PMC GPIO EMIO bits 0-3 HIGH)\r\n");
+	usleep(10000);
+}
+#else
+static void release_phy_reset(void) { }
+#endif
+
 unsigned phy_setup_axiemac (XAxiEthernet *xaxiemacp)
 {
 	unsigned link_speed = 1000;
 	u32 port_num;
 	u32 phy_addr;
 	unsigned char mac_ethernet_address[] = { 0x00, 0x0a, 0x35, 0x00, 0x01, 0x02 };
+
+	/* Release PHYs from reset (Versal only, runs once) */
+	release_phy_reset();
 
 	/* Determine the port number from the MAC base address */
 	port_num = 0;
@@ -898,6 +941,7 @@ unsigned phy_setup_axiemac (XAxiEthernet *xaxiemacp)
 #ifdef  CONFIG_LINKSPEED_AUTODETECT
 	link_speed = get_IEEE_phy_speed(xaxiemacp, axieth_mdio, phy_addr);
 	xil_printf("auto-negotiated link speed: %d\r\n", link_speed);
+
 #elif	defined(CONFIG_LINKSPEED1000)
 	link_speed = 1000;
 	configure_IEEE_phy_speed(xaxiemacp, axieth_mdio, phy_addr, link_speed);

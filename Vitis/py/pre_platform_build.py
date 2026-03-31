@@ -16,7 +16,7 @@ Called by build-vitis.py with platform, domain_name, and arch as kwargs.
 TICK_TIMER_MAP = {
     "zynq":       "ps7_scutimer_0",
     "zynqmp":     "psu_ttc_0",
-    "versal":     "psv_ttc_0",
+    "versal":     "versal_cips_0_pspmc_0_psv_ttc_0",
     "microblaze": "axi_timer_0",
 }
 
