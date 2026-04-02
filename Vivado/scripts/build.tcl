@@ -35,7 +35,7 @@ set_param board.repoPaths [get_property LOCAL_ROOT_DIR [xhub::get_xstores xilinx
 
 # Possible targets
 # UPDATER START
-dict set target_dict auboard { avnet.com auboard_15p mb { 0 1 2 3 } }
+dict set target_dict auboard { avnet-tria auboard_15p mb { 0 1 2 3 } }
 dict set target_dict kcu105_hpc { xilinx.com kcu105 mb { 0 1 2 3 } }
 dict set target_dict uzev { avnet.com ultrazed_7ev_cc zynqmp { 0 1 2 3 } }
 dict set target_dict vck190_fmcp1 { xilinx.com vck190 versal { 0 1 2 3 } }
