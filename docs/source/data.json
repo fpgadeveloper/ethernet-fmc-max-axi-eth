@@ -196,7 +196,7 @@
     },
     {
       "publish": false,
-      "label": "vcu118",
+      "label": "vcu118_fmcp",
       "board": "VCU118",
       "link": "https://www.xilinx.com/vcu118",
       "url": "xilinx.com",

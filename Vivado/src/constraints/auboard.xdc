@@ -33,7 +33,7 @@ set_property PACKAGE_PIN Y1 [get_ports sgmii_port_0_rxn]; # DP0_M2C_N
 # P0: PHY GPIOs and RESET
 set_property PACKAGE_PIN H14 [get_ports {gpio_tri_i[2]}]; # PHY0 GPIO0: LA08_P
 set_property PACKAGE_PIN G14 [get_ports {gpio_tri_i[3]}]; # PHY0 GPIO1: LA08_N
-set_property PACKAGE_PIN J18 [get_ports {reset_port_0[0]}]; # PHY0 RESET: LA12_P
+set_property PACKAGE_PIN L18 [get_ports {reset_port_0[0]}]; # PHY0 RESET: LA12_P
 
 ###################
 # Ethernet port P1
@@ -50,7 +50,7 @@ set_property PACKAGE_PIN V1 [get_ports sgmii_port_1_rxn]; # DP1_M2C_N
 # P1: PHY GPIOs and RESET
 set_property PACKAGE_PIN J12 [get_ports {gpio_tri_i[4]}]; # PHY1 GPIO0: LA07_P
 set_property PACKAGE_PIN H12 [get_ports {gpio_tri_i[5]}]; # PHY1 GPIO1: LA07_N
-set_property PACKAGE_PIN L18 [get_ports {reset_port_1[0]}]; # PHY1 RESET: LA12_N
+set_property PACKAGE_PIN K18 [get_ports {reset_port_1[0]}]; # PHY1 RESET: LA12_N
 
 ###################
 # Ethernet port P2

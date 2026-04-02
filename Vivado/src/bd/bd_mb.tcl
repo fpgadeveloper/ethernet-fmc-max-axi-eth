@@ -94,10 +94,26 @@ if {$is_vcu108} {
 if {$is_vcu118} {
   apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {default_250mhz_clk1 ( 250 MHz System differential clock1 ) } Manual_Source {Auto}}  [get_bd_intf_pins ddr4_0/C0_SYS_CLK]
   apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {ddr4_sdram_c1_062 ( DDR4 SDRAM C1 ) } Manual_Source {Auto}}  [get_bd_intf_pins ddr4_0/C0_DDR4]
+  # Add the second user clock: addn_ui_clkout2 @ 50MHz - we need this for the AXI Eth ref_clk
+  # The other dev boards enable this in the automation procedure, so we don't need to do it for them
+  set_property CONFIG.ADDN_UI_CLKOUT2_FREQ_HZ {50} [get_bd_cells ddr4_0]
+}
+if {$is_auboard} {
+  apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {ddr4_sdram ( DDR4 SDRAM ) } Manual_Source {Auto}}  [get_bd_intf_pins ddr4_0/C0_DDR4]
+  apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {system_clock_300mhz ( System differential clock ) } Manual_Source {Auto}}  [get_bd_intf_pins ddr4_0/C0_SYS_CLK]
+  # Add the second user clock: addn_ui_clkout2 @ 50MHz - we need this for the AXI Eth ref_clk
+  # The other dev boards enable this in the automation procedure, so we don't need to do it for them
+  set_property CONFIG.ADDN_UI_CLKOUT2_FREQ_HZ {50} [get_bd_cells ddr4_0]
 }
 
 # Board FPGA reset
-apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {reset ( FPGA Reset ) } Manual_Source {New External Port (ACTIVE_HIGH)}}  [get_bd_pins ddr4_0/sys_rst]
+if {$is_auboard} {
+  apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {system_resetn ( FPGA Reset ) } Manual_Source {New External Port (ACTIVE_HIGH)}}  [get_bd_pins ddr4_0/sys_rst]
+  set sys_rst_port "system_resetn"
+} else {
+  apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {reset ( FPGA Reset ) } Manual_Source {New External Port (ACTIVE_HIGH)}}  [get_bd_pins ddr4_0/sys_rst]
+  set sys_rst_port "reset"
+}
 
 # Add the Microblaze
 create_bd_cell -type ip -vlnv xilinx.com:ip:microblaze microblaze_0
@@ -127,7 +143,9 @@ CONFIG.C_USE_MMU {3} \
 CONFIG.C_MMU_ZONES {2}] [get_bd_cells microblaze_0]
 
 # Connect 100MHz processor system reset external reset to the reset port
-connect_bd_net [get_bd_ports reset] [get_bd_pins rst_ddr4_0_100M/ext_reset_in]
+# Note that AUBoard's system_resetn port is active LOW while other boards are active HIGH but the
+# proc system reset will auto-detect this and configure correctly.
+connect_bd_net [get_bd_ports $sys_rst_port] [get_bd_pins rst_ddr4_0_100M/ext_reset_in]
 
 # AXI Eth ref_clk 50MHz for SGMII UltraScale/UltraScale+/Versal
 set ref_clk "ddr4_0/addn_ui_clkout2"
