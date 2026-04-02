@@ -8,6 +8,10 @@
 # To use the dictionary:
 #   * Get the GT coordinate:    dict get $gt_loc_dict <target> <port number>
 
+dict set gt_loc_dict auboard 0 X0Y4
+dict set gt_loc_dict auboard 1 X0Y5
+dict set gt_loc_dict auboard 2 X0Y6
+dict set gt_loc_dict auboard 3 X0Y7
 dict set gt_loc_dict kcu105_hpc 0 X0Y16
 dict set gt_loc_dict kcu105_hpc 1 X0Y17
 dict set gt_loc_dict kcu105_hpc 2 X0Y18
