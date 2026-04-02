@@ -131,7 +131,7 @@ int main()
 	echo_netif = &server_netif;
 
 	/* Enable VADJ 1.5V for FMC+ I/Os (Versal boards only) */
-	vadj_1v5_enable();
+	vadj_enable(VADJ_1V5);
 
 #if defined (__arm__) && !defined (ARMR5)
 #if XPAR_GIGE_PCS_PMA_SGMII_CORE_PRESENT == 1 || XPAR_GIGE_PCS_PMA_1000BASEX_CORE_PRESENT == 1
