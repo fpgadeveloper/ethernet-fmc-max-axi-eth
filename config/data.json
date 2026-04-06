@@ -1,4 +1,6 @@
 {
+  "bd_name": "axiethmax",
+  "vivado_bd_name": "axieth",
   "groups": [
     {
       "label": "fpga",
@@ -16,7 +18,7 @@
       "label": "versal",
       "name": "Versal"
     }
-    ],
+  ],
   "designs": [
     {
       "publish": false,
@@ -25,7 +27,12 @@
       "link": "https://www.xilinx.com/products/boards-and-kits/1-1xj8wo9.html",
       "url": "avnet-tria",
       "boardname": "auboard_15p",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "HPC",
       "group": "fpga",
       "petalinux": true,
@@ -41,7 +48,12 @@
       "link": "https://www.xilinx.com/kcu105",
       "url": "xilinx.com",
       "boardname": "kcu105",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "HPC",
       "group": "fpga",
       "petalinux": true,
@@ -57,7 +69,12 @@
       "link": "https://www.xilinx.com/products/boards-and-kits/1-1s78dxb.html",
       "url": "avnet.com",
       "boardname": "ultrazed_7ev_cc",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "HPC",
       "group": "zu",
       "petalinux": true,
@@ -73,7 +90,12 @@
       "link": "https://www.xilinx.com/vck190",
       "url": "xilinx.com",
       "boardname": "vck190",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "FMCP1",
       "group": "versal",
       "petalinux": true,
@@ -89,7 +111,12 @@
       "link": "https://www.xilinx.com/vck190",
       "url": "xilinx.com",
       "boardname": "vck190",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "FMCP2",
       "group": "versal",
       "petalinux": true,
@@ -105,7 +132,12 @@
       "link": "https://www.xilinx.com/vek280",
       "url": "xilinx.com",
       "boardname": "vek280",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "FMCP",
       "group": "versal",
       "petalinux": true,
@@ -121,7 +153,12 @@
       "link": "https://www.xilinx.com/vhk158",
       "url": "xilinx.com",
       "boardname": "vhk158",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "FMCP",
       "group": "versal",
       "petalinux": true,
@@ -137,7 +174,12 @@
       "link": "https://www.xilinx.com/vmk180",
       "url": "xilinx.com",
       "boardname": "vmk180",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "FMCP1",
       "group": "versal",
       "petalinux": true,
@@ -153,7 +195,12 @@
       "link": "https://www.xilinx.com/vmk180",
       "url": "xilinx.com",
       "boardname": "vmk180",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "FMCP2",
       "group": "versal",
       "petalinux": true,
@@ -169,7 +216,12 @@
       "link": "https://www.xilinx.com/vpk120",
       "url": "xilinx.com",
       "boardname": "vpk120",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "FMCP",
       "group": "versal",
       "petalinux": true,
@@ -185,7 +237,12 @@
       "link": "https://www.xilinx.com/vpk180",
       "url": "xilinx.com",
       "boardname": "vpk180",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "FMCP",
       "group": "versal",
       "petalinux": true,
@@ -201,7 +258,12 @@
       "link": "https://www.xilinx.com/vcu118",
       "url": "xilinx.com",
       "boardname": "vcu118",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "FMCP",
       "group": "fpga",
       "petalinux": true,
@@ -217,7 +279,12 @@
       "link": "https://www.xilinx.com/zcu102",
       "url": "xilinx.com",
       "boardname": "zcu102",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "HPC0",
       "group": "zu",
       "petalinux": true,
@@ -233,7 +300,12 @@
       "link": "https://www.xilinx.com/zcu102",
       "url": "xilinx.com",
       "boardname": "zcu102",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "HPC1",
       "group": "zu",
       "petalinux": true,
@@ -249,7 +321,9 @@
       "link": "https://www.xilinx.com/zcu104",
       "url": "xilinx.com",
       "boardname": "zcu104",
-      "lanes": [0],
+      "lanes": [
+        0
+      ],
       "connector": "LPC",
       "group": "zu",
       "petalinux": true,
@@ -265,7 +339,12 @@
       "link": "https://www.xilinx.com/zcu106",
       "url": "xilinx.com",
       "boardname": "zcu106",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "HPC0",
       "group": "zu",
       "petalinux": true,
@@ -281,7 +360,12 @@
       "link": "https://www.xilinx.com/zcu111",
       "url": "xilinx.com",
       "boardname": "zcu111",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "FMCP",
       "group": "zu",
       "petalinux": true,
@@ -297,7 +381,12 @@
       "link": "https://www.xilinx.com/zcu208",
       "url": "xilinx.com",
       "boardname": "zcu208",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "FMCP",
       "group": "zu",
       "petalinux": true,
@@ -313,7 +402,12 @@
       "link": "https://www.xilinx.com/zcu216",
       "url": "xilinx.com",
       "boardname": "zcu216",
-      "lanes": [0,1,2,3],
+      "lanes": [
+        0,
+        1,
+        2,
+        3
+      ],
       "connector": "FMCP",
       "group": "zu",
       "petalinux": true,

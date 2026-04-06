@@ -35,7 +35,9 @@
 
 #include "platform.h"
 #include "platform_config.h"
+#if __has_include("vadj.h")
 #include "vadj.h"
+#endif
 #if defined (__arm__) || defined(__aarch64__)
 #include "xil_printf.h"
 #endif
@@ -130,8 +132,10 @@ int main()
 
 	echo_netif = &server_netif;
 
+#ifdef VADJ_H
 	/* Enable VADJ 1.5V for FMC+ I/Os (Versal boards only) */
 	vadj_enable(VADJ_1V5);
+#endif
 
 #if defined (__arm__) && !defined (ARMR5)
 #if XPAR_GIGE_PCS_PMA_SGMII_CORE_PRESENT == 1 || XPAR_GIGE_PCS_PMA_1000BASEX_CORE_PRESENT == 1

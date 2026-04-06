@@ -270,16 +270,6 @@ foreach port $ports {
   connect_bd_net [get_bd_pins const_signal_detect/dout] [get_bd_pins axi_ethernet_${port}/signal_detect]
 }
 
-# Connect the interrupts to AXI Intc(max 32 interrupts)
-set n_interrupts [llength $intr_list]
-set intr_concat [get_bd_cells "microblaze_0_xlconcat"]
-set_property -dict [list CONFIG.NUM_PORTS $n_interrupts] $intr_concat
-set intr_index 0
-foreach intr $intr_list {
-  connect_bd_net [get_bd_pins $intr] [get_bd_pins ${intr_concat}/In$intr_index]
-  set intr_index [expr {$intr_index+1}]
-}
-
 # Add the AXI GPIO for the power good and PHY GPIO signals
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio axi_gpio_0
 set_property -dict [list \
@@ -291,6 +281,39 @@ connect_bd_net [get_bd_pins rst_ddr4_0_100M/peripheral_aresetn] [get_bd_pins axi
 apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master {/microblaze_0 (Periph)} Slave {/axi_gpio_0/S_AXI} ddr_seg {Auto} intc_ip {/microblaze_0_axi_periph} master_apm {0}}  [get_bd_intf_pins axi_gpio_0/S_AXI]
 create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 gpio
 connect_bd_intf_net [get_bd_intf_pins axi_gpio_0/GPIO] [get_bd_intf_ports gpio]
+
+# Add the AXI Timer (lwip echo server needs one)
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_timer axi_timer_0
+connect_bd_net [get_bd_pins $sys_clk] [get_bd_pins axi_timer_0/s_axi_aclk]
+connect_bd_net [get_bd_pins rst_ddr4_0_100M/peripheral_aresetn] [get_bd_pins axi_timer_0/s_axi_aresetn]
+apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master {/microblaze_0 (Periph)} Slave {/axi_timer_0/S_AXI} ddr_seg {Auto} intc_ip {/microblaze_0_axi_periph} master_apm {0}}  [get_bd_intf_pins axi_timer_0/S_AXI]
+lappend intr_list "axi_timer_0/interrupt"
+
+# Add the UART
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_uartlite axi_uartlite_0
+set_property -dict [list \
+  CONFIG.C_BAUDRATE {115200} \
+  CONFIG.UARTLITE_BOARD_INTERFACE {Custom} \
+  CONFIG.USE_BOARD_FLOW {true} \
+] [get_bd_cells axi_uartlite_0]
+apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master {/microblaze_0 (Periph)} Slave {/axi_uartlite_0/S_AXI} ddr_seg {Auto} intc_ip {/microblaze_0_axi_periph} master_apm {0}}  [get_bd_intf_pins axi_uartlite_0/S_AXI]
+if {$is_kcu105 || $is_vcu118} {
+  apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {rs232_uart ( UART ) } Manual_Source {Auto}}  [get_bd_intf_pins axi_uartlite_0/UART]
+}
+if {$is_auboard} {
+  apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {sys_uart ( System UART ) } Manual_Source {Auto}}  [get_bd_intf_pins axi_uartlite_0/UART]
+}
+lappend intr_list "axi_uartlite_0/interrupt"
+
+# Connect the interrupts to AXI Intc(max 32 interrupts)
+set n_interrupts [llength $intr_list]
+set intr_concat [get_bd_cells "microblaze_0_xlconcat"]
+set_property -dict [list CONFIG.NUM_PORTS $n_interrupts] $intr_concat
+set intr_index 0
+foreach intr $intr_list {
+  connect_bd_net [get_bd_pins $intr] [get_bd_pins ${intr_concat}/In$intr_index]
+  set intr_index [expr {$intr_index+1}]
+}
 
 # Assign addresses
 assign_bd_address

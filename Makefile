@@ -4,7 +4,6 @@
 
 RM = rm -rf
 ROOT_DIR = $(shell pwd)
-BD_NAME = axiethmax
 
 # defaults
 .DEFAULT_GOAL := bootimage
@@ -13,6 +12,7 @@ JOBS ?= 8
 
 # valid targets (template name, both (plnx+baremetal) or baremetal_only)
 # UPDATER START
+BD_NAME = axiethmax
 auboard_target := microblaze both
 kcu105_hpc_target := microblaze both
 uzev_target := zynqMP both
