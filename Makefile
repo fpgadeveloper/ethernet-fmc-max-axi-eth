@@ -12,7 +12,9 @@ JOBS ?= 8
 
 # valid targets (template name, both (plnx+baremetal) or baremetal_only)
 # UPDATER START
-BD_NAME = axiethmax
+BD_NAME = axieth
+PRJ_NAME = ethernet-fmc-max-axi-eth
+COMBINE_BIT_ELF = false
 auboard_target := microblaze both
 kcu105_hpc_target := microblaze both
 uzev_target := zynqMP both
@@ -63,9 +65,9 @@ VIT_BOOT_TARG = $(VIT_BOOT)/$(TARGET)
 
 # outputs
 BOOTIMAGE_DIR = $(ROOT_DIR)/bootimages
-TEMPBOOT_DIR = $(BOOTIMAGE_DIR)/$(BD_NAME)_$(TARGET)
-PETL_ZIP = $(BOOTIMAGE_DIR)/$(BD_NAME)_$(TARGET)_petalinux-2025-2.zip
-BARE_ZIP = $(BOOTIMAGE_DIR)/$(BD_NAME)_$(TARGET)_standalone-2025-2.zip
+TEMPBOOT_DIR = $(BOOTIMAGE_DIR)/$(PRJ_NAME)_$(TARGET)
+PETL_ZIP = $(BOOTIMAGE_DIR)/$(PRJ_NAME)_$(TARGET)_petalinux-2025-2.zip
+BARE_ZIP = $(BOOTIMAGE_DIR)/$(PRJ_NAME)_$(TARGET)_standalone-2025-2.zip
 BOOTIMAGE_LOCK = $(ROOT_DIR)/.$(TARGET).lock
 
 # These macros return values from the valid target lists defined above
@@ -79,7 +81,11 @@ endef
 
 # The name of the boot image of the baremetal app depends on the device
 ifeq ($(call get_template_name,$(TARGET)), microblaze)
-	VIT_BOOT_FILE = $(VIT_BOOT_TARG)/$(TARGET).bit
+  ifeq ($(COMBINE_BIT_ELF), true)
+	VIT_BOOT_FILE = $(VIT_BOOT_TARG)/$(BD_NAME)_boot.bit
+  else
+	VIT_BOOT_FILE = $(VIT_BOOT_TARG)/$(BD_NAME).bit
+  endif
 else ifeq ($(call get_template_name,$(TARGET)), zynq)
 	VIT_BOOT_FILE = $(VIT_BOOT_TARG)/BOOT.BIN
 else ifeq ($(call get_template_name,$(TARGET)), zynqMP)
@@ -137,6 +143,8 @@ bootimage: check_target
 bootimage_locked: bootimage_$(call get_both_or_baremetal_only,$(TARGET))
 
 bootimage_baremetal_only: $(BARE_ZIP)
+
+bootimage_petalinux_only: $(PETL_ZIP)
 
 bootimage_both: $(PETL_ZIP) $(BARE_ZIP)
 
@@ -209,7 +217,7 @@ $(BARE_ZIP): $(VIT_BOOT_FILE)
 	cd $(VIT_BOOT_TARG) && zip -r $(BARE_ZIP) .
 
 $(VIT_BOOT_FILE):
-	$(MAKE) --no-print-directory -C $(VIT_ROOT) workspace TARGET=$(TARGET) JOBS=$(JOBS)
+	$(MAKE) --no-print-directory -C $(VIT_ROOT) bootfile TARGET=$(TARGET) JOBS=$(JOBS)
 	@if [ ! -e $@ ]; then echo "Error: $@ was not created for $(TARGET)."; exit 1; fi
 
 .PHONY: clean

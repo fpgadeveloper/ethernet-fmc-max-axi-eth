@@ -1,6 +1,6 @@
 {
-  "bd_name": "axiethmax",
-  "vivado_bd_name": "axieth",
+  "bd_name": "axieth",
+  "prj_name": "ethernet-fmc-max-axi-eth",
   "groups": [
     {
       "label": "fpga",
