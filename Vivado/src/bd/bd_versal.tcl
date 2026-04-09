@@ -591,11 +591,11 @@ foreach port $ports {
 }
 
 # Connect constant values to BUFG GTs
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant xlconstant
+create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilconstant:1.0 xlconstant
 set_property -dict [list CONFIG.CONST_VAL {1} CONFIG.CONST_WIDTH {3}] [get_bd_cells xlconstant]
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant xlconstant_0
+create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilconstant:1.0 xlconstant_0
 set_property -dict [list CONFIG.CONST_VAL {1} CONFIG.CONST_WIDTH {1}] [get_bd_cells xlconstant_0]
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant xlconstant_1
+create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilconstant:1.0 xlconstant_1
 set_property -dict [list CONFIG.CONST_VAL {0} CONFIG.CONST_WIDTH {1}] [get_bd_cells xlconstant_1]
 foreach port $ports {
   connect_bd_net [get_bd_pins xlconstant/dout] [get_bd_pins bufg_gt_txoutclk_div2_${port}/gt_bufgtdiv]
@@ -646,7 +646,7 @@ connect_bd_net [get_bd_pins util_ds_buf_0/IBUF_OUT] [get_bd_pins gt_quad_base_0/
 
 # PHY reset signals
 foreach port $ports {
-  create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice xlslice_phy${port}
+  create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilslice:1.0 xlslice_phy${port}
   set_property -dict [list \
     CONFIG.DIN_FROM $port \
     CONFIG.DIN_TO $port \
@@ -659,7 +659,7 @@ foreach port $ports {
 }
 
 # signal_detect and MMCM locked tied HIGH
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant const_high
+create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilconstant:1.0 const_high
 set_property CONFIG.CONST_VAL {1} [get_bd_cells const_high]
 foreach port $ports {
   connect_bd_net [get_bd_pins const_high/dout] [get_bd_pins axi_ethernet_${port}/signal_detect]

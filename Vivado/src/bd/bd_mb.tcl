@@ -255,7 +255,7 @@ foreach port $ports {
 }
 
 # Correctly tie off the unused ports
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant const_low
+create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilconstant:1.0 const_low
 set_property CONFIG.CONST_VAL {0} [get_bd_cells const_low]
 foreach port $unused_ports {
   # PHY RESET - hold LOW - keep unused PHYs in reset
@@ -264,7 +264,7 @@ foreach port $unused_ports {
 }
 
 # signal_detect tied HIGH
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant const_signal_detect
+create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilconstant:1.0 const_signal_detect
 set_property CONFIG.CONST_VAL {1} [get_bd_cells const_signal_detect]
 foreach port $ports {
   connect_bd_net [get_bd_pins const_signal_detect/dout] [get_bd_pins axi_ethernet_${port}/signal_detect]
