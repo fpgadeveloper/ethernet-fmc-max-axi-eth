@@ -39,4 +39,4 @@ below outlines the corresponding applications available in each environment:
 | PetaLinux        | Built-in Linux commands<br>Additional tools: ethtool, phytool, iperf3 |
 
 
-[Ethernet FMC Max]: https://ethernetfmc.com/docs/ethernet-fmc-max/overview/
+[Ethernet FMC Max]: https://docs.opsero.com/op080/datasheet/overview/

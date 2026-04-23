@@ -42,4 +42,4 @@ In order to test this design on hardware, you will need the following:
 
 For list of the target designs showing the number of ports supported, refer to the build instructions.
 
-[Ethernet FMC Max]: https://ethernetfmc.com/docs/ethernet-fmc-max/overview/
+[Ethernet FMC Max]: https://docs.opsero.com/op080/datasheet/overview/

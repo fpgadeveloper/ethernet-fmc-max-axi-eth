@@ -23,4 +23,4 @@ This is the documentation for the AXI 1G Ethernet reference designs for the `Eth
    revision_history
 
 
-.. _Ethernet FMC Max: https://ethernetfmc.com/docs/ethernet-fmc-max/overview/
+.. _Ethernet FMC Max: https://docs.opsero.com/op080/datasheet/overview/

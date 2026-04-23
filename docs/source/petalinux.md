@@ -320,6 +320,6 @@ PING 192.168.2.10 (192.168.2.10): 56 data bytes
 ```
 
 
-[Ethernet FMC Max]: https://ethernetfmc.com/docs/ethernet-fmc-max/overview/
+[Ethernet FMC Max]: https://docs.opsero.com/op080/datasheet/overview/
 [supported Linux distributions]: https://docs.amd.com/r/en-US/ug1144-petalinux-tools-reference-guide/Setting-Up-Your-Environment
 
