@@ -21,7 +21,7 @@
   ],
   "designs": [
     {
-      "publish": false,
+      "publish": true,
       "label": "auboard",
       "board": "AUBoard",
       "link": "https://www.xilinx.com/products/boards-and-kits/1-1xj8wo9.html",
@@ -42,7 +42,7 @@
       "flashintf": "SPIx4"
     },
     {
-      "publish": false,
+      "publish": true,
       "label": "kcu105_hpc",
       "board": "KCU105",
       "link": "https://www.xilinx.com/kcu105",
@@ -252,7 +252,7 @@
       "flashintf": "0"
     },
     {
-      "publish": false,
+      "publish": true,
       "label": "vcu118_fmcp",
       "board": "VCU118",
       "link": "https://www.xilinx.com/vcu118",

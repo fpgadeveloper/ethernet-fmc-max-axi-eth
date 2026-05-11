@@ -39,6 +39,14 @@ the FMC connector on which to connect the mezzanine card. Some of the target des
 require a license to generate a bitstream with the AMD Xilinx tools.
 
 <!-- updater start -->
+### FPGA designs
+
+| Target board          | Target design      | Ports       | FMC Slot    | Standalone<br> Echo Server | PetaLinux | Vivado<br> Edition |
+|-----------------------|--------------------|-------------|-------------|-------|-------|-------|
+| [AUBoard]             | `auboard`          | 4x          | HPC         | :white_check_mark: | :white_check_mark: | Standard :free: |
+| [KCU105]              | `kcu105_hpc`       | 4x          | HPC         | :white_check_mark: | :white_check_mark: | Enterprise |
+| [VCU118]              | `vcu118_fmcp`      | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise |
+
 ### Zynq UltraScale+ designs
 
 | Target board          | Target design      | Ports       | FMC Slot    | Standalone<br> Echo Server | PetaLinux | Vivado<br> Edition |
@@ -65,6 +73,9 @@ require a license to generate a bitstream with the AMD Xilinx tools.
 | [VPK120]              | `vpk120`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise |
 | [VPK180]              | `vpk180`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise |
 
+[AUBoard]: https://www.xilinx.com/products/boards-and-kits/1-1xj8wo9.html
+[KCU105]: https://www.xilinx.com/kcu105
+[VCU118]: https://www.xilinx.com/vcu118
 [UltraZed-EV Carrier]: https://www.xilinx.com/products/boards-and-kits/1-1s78dxb.html
 [ZCU102]: https://www.xilinx.com/zcu102
 [ZCU104]: https://www.xilinx.com/zcu104
