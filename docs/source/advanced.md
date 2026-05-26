@@ -214,10 +214,15 @@ the target, exercising the AXI Ethernet ports. The application source
 is shared across all targets; per-target specialisation is handled by
 the build driver, not by per-target source.
 
-The Ethernet FMC Max requires the VADJ (FMC adjustable I/O voltage
-rail) to be programmed to 1.8V before the on-board PHYs come out of
-reset. The application performs that programming at startup via the
-`vadj.c` / `vadj.h` files in `common/src`.
+The Ethernet FMC Max requires the FMC adjustable I/O voltage rail (VADJ)
+to be programmed to 1.5V before the on-board PHYs come out of reset. On
+Versal targets that do not enable VADJ from the platform itself, the
+standalone application performs that programming at startup via the
+`vadj.c` / `vadj.h` files in `common/src` (the entry point in `main.c`
+calls `vadj_enable(VADJ_1V5)`). VEK280 already enables VADJ by default
+and this call is a no-op. Non-Versal boards rely on the FSBL (ZCU102/
+ZCU106) or board-default rails to bring VADJ up; the ZCU104 FSBL needs
+the patch listed under the ZCU104 BSP section below.
 
 ### Layout
 
@@ -418,11 +423,13 @@ the stock one?"* — it is what to re-apply if you ever do that.
 * **SD-card root filesystem** configured in `configs/config`:
   `CONFIG_SUBSYSTEM_ROOTFS_EXT4`, `CONFIG_SUBSYSTEM_SDROOT_DEV`,
   `CONFIG_SUBSYSTEM_USER_CMDLINE` (with `cma=1536M` for the AXI DMA
-  buffers).
+  buffers — except the UZ-EV, which overrides this to `cma=1000M` to fit
+  the smaller SoM DDR budget; see the UZ-EV section below).
 * **DMA-engine kernel configs**:
   `CONFIG_XILINX_DMA_ENGINES`, `CONFIG_XILINX_DPDMA`,
   `CONFIG_XILINX_ZYNQMP_DMA`.
-* **U-Boot patch `0001-ubifs-distroboot-support.patch`**.
+* **U-Boot patch `0001-ubifs-distroboot-support.patch`** (one copy lives in
+  each ZynqMP board BSP under `recipes-bsp/u-boot/files/`).
 
 ### UltraZed-EV (uzev) BSP
 
@@ -441,9 +448,14 @@ the stock one?"* — it is what to re-apply if you ever do that.
 
 * **FSBL patch `zcu104_vadj_fsbl.patch`** in
   `recipes-bsp/embeddedsw/files/`, registered via
-  `fsbl-firmware_%.bbappend`. The ZCU104 FSBL is patched to program the 
-  on-board IRPS5401 PMBus regulator to 1.8V before the FMC PHYs come 
-  out of reset.
+  `fsbl-firmware_%.bbappend`. The stock 2025.2 ZCU104 FSBL reads the wrong
+  EEPROM (the board EEPROM at I2C address 0x54 on TCA9548A channel 1
+  instead of the FMC EEPROM at 0x50 on channel 6) and only reads 32 bytes,
+  which is not enough to reach the VADJ voltage record. The patch fixes
+  the EEPROM address (0x50), the mux channel (channel 6 = 0x20), the
+  buffer size (256 bytes), and adds the missing "set read address to zero"
+  write, so the FSBL can correctly detect the FMC's VADJ requirement and
+  program the on-board IRPS5401 PMBus regulator accordingly.
 * Standard ZynqMP SD-root configs and U-Boot ubifs patch as above.
 
 ### Versal BSPs (vck190, vmk180, vpk120, vpk180, vhk158, vek280)

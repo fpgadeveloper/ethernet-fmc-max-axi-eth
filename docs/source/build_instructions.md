@@ -9,8 +9,13 @@ The source code for the reference designs is managed on this Github repository:
 To get the code, you can follow the link and use the **Download ZIP** option, or you can clone it
 using this command:
 ```
-git clone https://github.com/fpgadeveloper/ethernet-fmc-max-axi-eth.git
+git clone --recursive https://github.com/fpgadeveloper/ethernet-fmc-max-axi-eth.git
 ```
+
+The `--recursive` flag pulls in `submodules/avnet-bdf` (the Avnet board definition
+files, required for the AUBoard target — these are not yet in the AMD Board Store).
+If you used **Download ZIP**, you'll need to clone the submodule separately, or
+download it from the Avnet BDF repository and place it under `submodules/avnet-bdf/`.
 
 ## License requirements
 
@@ -99,7 +104,7 @@ to build the Vivado and PetaLinux projects with a single command.
    ```
 2. Clone the Git repository and `cd` into the `Vivado` folder of the repo:
    ```
-   git clone https://github.com/fpgadeveloper/ethernet-fmc-max-axi-eth.git
+   git clone --recursive https://github.com/fpgadeveloper/ethernet-fmc-max-axi-eth.git
    cd ethernet-fmc-max-axi-eth/Vivado
    ```
 3. Run make to create the Vivado project for the target board. You must replace `<target>` with a valid

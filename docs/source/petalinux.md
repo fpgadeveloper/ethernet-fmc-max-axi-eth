@@ -38,7 +38,19 @@ users are advised to use a Linux virtual machine to build the PetaLinux projects
 The last command will launch the build process for the corresponding Vivado project if that project
 has not already been built and it's hardware exported.
 
-## Boot from SD card
+## Boot a MicroBlaze design (auboard, kcu105_hpc, vcu118_fmcp)
+
+The MicroBlaze designs do not boot from SD; instead the PetaLinux build
+packages `images/linux/boot.mcs`, which is programmed into the board's QSPIx4
+flash. The kernel uses an initramfs root, so no SD card is needed. See
+`PetaLinux/Makefile` (flash-size column) for the per-board flash size
+(32 MB on KCU105, 64 MB on AUBoard, 128 MB on VCU118).
+
+The simplest way to bring one of these targets up the first time is via JTAG;
+see [Boot via JTAG](#boot-via-jtag) below. For production flashing,
+program `boot.mcs` into QSPI using Vivado's Hardware Manager.
+
+## Boot from SD card (Zynq UltraScale+ and Versal)
 
 ### Prepare the SD card
 
@@ -109,21 +121,28 @@ For instructions, read section
 from the Vivado release notes.
 ```
 
-```{warning} If you boot the Zynq-7000, Zynq UltraScale+ or Zynq RFSoC designs via JTAG, you must still
+```{warning} If you boot the Zynq UltraScale+ or Zynq RFSoC designs via JTAG, you must still
 first prepare the SD card. The reason is because these designs are configured to use the SD card to store
 the root filesystem. If you boot these designs via JTAG without preparing and connecting the SD card, the
-boot will hang during at a message similar to this: `Waiting for root device /dev/mmcblk0p2...`
+boot will hang at a message similar to this: `Waiting for root device /dev/mmcblk0p2...`
+The Versal and MicroBlaze designs use an initramfs root and do not require the SD card to boot.
 ```
 
 ### Setup hardware
 
-1. Prepare the SD card according to the [instructions above](#prepare-the-sd-card) and plug the SD card 
-   into your target board.
+1. For Zynq UltraScale+ and RFSoC targets, prepare the SD card according to
+   the [instructions above](#prepare-the-sd-card) and plug it into the
+   target board. The Versal and MicroBlaze designs use an initramfs root
+   and do not require an SD card for JTAG boot.
 2. Ensure that the target board is configured to boot from JTAG:
    * **VCK190, VMK180, VEK280, VPK120:** DIP switch SW1 is set to 1111 (1=ON,2=ON,3=ON,4=ON)
    * **UltraZed-EV:** DIP switch SW2 (on the SoM) is set to 1111 (1=ON,2=ON,3=ON,4=ON)
    * **ZCU102, ZCU104, ZCU106, ZCU111:** DIP switch SW6 must be set to 1111 (1=ON,2=ON,3=ON,4=ON)
    * **ZCU208, ZCU216:** DIP switch SW2 must be set to 1111 (1=ON,2=ON,3=ON,4=ON)
+   * **AUBoard, KCU105, VCU118:** MicroBlaze targets boot via JTAG by
+     default once the bitstream is loaded; no boot-mode switch needs to
+     change. (For long-term standalone operation, program `boot.mcs`
+     into the on-board SPIx4 flash.)
 3. Connect the [Ethernet FMC Max] to the FMC connector of the target board.
 4. Connect the USB-UART to your PC and then open a UART terminal set to 115200 baud and the 
    comport that corresponds to your target board.
@@ -176,36 +195,59 @@ sudo screen /dev/ttyUSB0 115200
 
 ## Port configurations
 
-All designs will try to automatically configure the eth0 device on boot, so it can be
-useful to connect the eth0 device to a DHCP router before the hardware is powered-up.
-Note that on Zynq and ZynqMP designs, the eth0 device is connected to the development board's
-Ethernet port and not the Ethernet FMC.
+PetaLinux 2025.2 renames the network interfaces from the legacy `ethN` names to
+predictable `endN` names early in boot (you'll see `renamed from ethN` lines in
+the kernel log). The `endN` mapping is what `ifconfig` and `ip link` will show.
 
-### Zynq UltraScale+ designs
+The default interfaces table (`/etc/network/interfaces`) brings up `end0` at
+boot, so it is convenient to wire `end0` to a DHCP-enabled link before powering
+the board.
 
-* eth0: Ethernet FMC Port 0
-* eth1: Ethernet FMC Port 1
-* eth2: Ethernet FMC Port 2
-* eth3: Ethernet FMC Port 3
+### Zynq UltraScale+ designs (uzev, zcu102, zcu106, zcu111, zcu208, zcu216)
 
-### Versal designs
+Four-port variants (`ports-0123`):
 
-* eth0: GEM0 to Ethernet port of the dev board
-* eth1: Ethernet FMC Port 0
-* eth2: Ethernet FMC Port 1
-* eth3: Ethernet FMC Port 2
-* eth4: Ethernet FMC Port 3
+* `end0`: Ethernet FMC Max Port 1 (PHY @ MDIO addr 3)
+* `end1`: Ethernet FMC Max Port 2 (PHY @ MDIO addr 12)
+* `end2`: Ethernet FMC Max Port 3 (PHY @ MDIO addr 15)
+* `end3`: GEM3 onboard Ethernet port of the dev board
+* `end4`: Ethernet FMC Max Port 0 (PHY @ MDIO addr 1, master MDIO bus)
+
+### Zynq UltraScale+ single-port design (zcu104)
+
+The ZCU104 routes only one Ethernet lane through its LPC FMC slot, so the
+`ports-0xxx` overlay enables only Port 0:
+
+* `end0`: GEM3 onboard Ethernet port of the dev board
+* `end1`: Ethernet FMC Max Port 0 (PHY @ MDIO addr 1)
+
+### Versal designs (vck190, vmk180, vek280, vhk158, vpk120, vpk180)
+
+* `end0`: Ethernet FMC Max Port 0 (PHY @ MDIO addr 1, master MDIO bus)
+* `end1`: Ethernet FMC Max Port 1 (PHY @ MDIO addr 3)
+* `end2`: Ethernet FMC Max Port 2 (PHY @ MDIO addr 12)
+* `end3`: Ethernet FMC Max Port 3 (PHY @ MDIO addr 15)
+* `end4`: GEM0 onboard Ethernet port of the dev board
+* `end5`: GEM1 onboard Ethernet port of the dev board (when wired)
+
+The four FMC ports share a single MDIO bus rooted at `axi_ethernet_0`; the
+remaining `axi_ethernet_N` nodes have `xlnx,has-mdio = <0x1>` but an empty
+local MDIO node (see `PetaLinux/bsp/ports-0123/.../port-config.dtsi`).
 
 ## Example Usage
+
+The examples below are from a ZCU102 PetaLinux session. On Versal the
+interface names map differently — see the [Port configurations](#port-configurations)
+section above.
 
 ### Enable port
 
 This example will bring up a port.
 
 ```
-root@axieth:~# sudo ifconfig eth1 up
-[  228.274146] xilinx_axienet a0000000.ethernet eth1: Link is Up - 1Gbps/Full - flow control off
-[  228.282753] IPv6: ADDRCONF(NETDEV_CHANGE): eth1: link becomes ready
+root@zcu102-axieth-sgmii-2025-2:~# sudo ifconfig end4 up
+[  228.274146] xilinx_axienet a0000000.ethernet end4: Link is Up - 1Gbps/Full - flow control off
+[  228.282753] IPv6: ADDRCONF(NETDEV_CHANGE): end4: link becomes ready
 ```
 
 ### Enable port with fixed IP address
@@ -213,12 +255,12 @@ root@axieth:~# sudo ifconfig eth1 up
 This example sets a fixed IP address to a port.
 
 ```
-root@axieth:~# sudo ifconfig eth1 192.168.2.30 up
-[  390.080498] net eth1: Promiscuous mode disabled.
-[  390.085406] net eth1: Promiscuous mode disabled.
-[  390.091089] xilinx_axienet a0000000.ethernet eth1: Link is Down
-[  394.175238] xilinx_axienet a0000000.ethernet eth1: Link is Up - 1Gbps/Full - flow control off
-[  394.183769] IPv6: ADDRCONF(NETDEV_CHANGE): eth1: link becomes ready
+root@zcu102-axieth-sgmii-2025-2:~# sudo ifconfig end4 192.168.2.30 up
+[  390.080498] net end4: Promiscuous mode disabled.
+[  390.085406] net end4: Promiscuous mode disabled.
+[  390.091089] xilinx_axienet a0000000.ethernet end4: Link is Down
+[  394.175238] xilinx_axienet a0000000.ethernet end4: Link is Up - 1Gbps/Full - flow control off
+[  394.183769] IPv6: ADDRCONF(NETDEV_CHANGE): end4: link becomes ready
 ```
 
 ### Enable port using DHCP
@@ -227,34 +269,33 @@ This example enables a port and obtains an IP address for the port via DHCP. Not
 port must be connected to a DHCP enabled router.
 
 ```
-root@axieth:~# sudo udhcpc -i eth1
-udhcpc: started, v1.31.0
-[   68.814013] xilinx_axienet a0000000.ethernet eth1: Link is Up - 1Gbps/Full - flow control off
-[   68.822670] IPv6: ADDRCONF(NETDEV_CHANGE): eth1: link becomes ready
+root@zcu102-axieth-sgmii-2025-2:~# sudo udhcpc -i end4
+udhcpc: started, v1.36.1
+[   68.814013] xilinx_axienet a0000000.ethernet end4: Link is Up - 1Gbps/Full - flow control off
+[   68.822670] IPv6: ADDRCONF(NETDEV_CHANGE): end4: link becomes ready
 udhcpc: sending discover
-udhcpc: sending select for 192.168.2.23
-udhcpc: lease of 192.168.2.23 obtained, lease time 259200
+udhcpc: sending select for 192.168.2.72
+udhcpc: lease of 192.168.2.72 obtained, lease time 259200
 /etc/udhcpc.d/50default: Adding DNS 192.168.2.1
 ```
 
 ### Check port status
 
 In this example, we use the ``ifconfig`` command with no arguments to check the port status.
-The first interface (eth0) shown below is connected to the on-board Ethernet port and it has not been
-enabled, whereas the second interface (eth1) is connected to the Ethernet FMC port 0 and it has
-been enabled and configured with IP address 192.168.2.30.
+Trimmed excerpt — `end3` is the onboard GEM3 (not enabled), `end4` is Ethernet FMC Max
+port 0 brought up at 192.168.2.30:
 
 ```
-root@axieth:~# ifconfig
-eth0      Link encap:Ethernet  HWaddr 00:0A:35:00:22:01
+root@zcu102-axieth-sgmii-2025-2:~# ifconfig
+end3      Link encap:Ethernet  HWaddr A6:D3:33:F0:90:3B
           UP BROADCAST MULTICAST  MTU:1500  Metric:1
           RX packets:0 errors:0 dropped:0 overruns:0 frame:0
           TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
           collisions:0 txqueuelen:1000
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
-          Interrupt:30
+          Interrupt:50
 
-eth1      Link encap:Ethernet  HWaddr 00:0A:35:00:01:22
+end4      Link encap:Ethernet  HWaddr 00:0A:35:00:01:22
           inet addr:192.168.2.30  Bcast:192.168.2.255  Mask:255.255.255.0
           inet6 addr: fe80::20a:35ff:fe00:122/64 Scope:Link
           UP BROADCAST RUNNING  MTU:1500  Metric:1
@@ -267,17 +308,14 @@ lo        Link encap:Local Loopback
           inet addr:127.0.0.1  Mask:255.0.0.0
           inet6 addr: ::1/128 Scope:Host
           UP LOOPBACK RUNNING  MTU:65536  Metric:1
-          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
-          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
-          collisions:0 txqueuelen:1000
-          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+          ...
 ```
 
 We can also use ``ethtool`` to check the port status as follows.
 
 ```
-root@axieth:~# ethtool eth1
-Settings for eth1:
+root@zcu102-axieth-sgmii-2025-2:~# ethtool end4
+Settings for end4:
         Supported ports: [ TP MII FIBRE ]
         Supported link modes:   10baseT/Half 10baseT/Full
                                 100baseT/Half 100baseT/Full
@@ -308,15 +346,15 @@ Settings for eth1:
 
 ### Ping link partner using specific port
 
-In this example we ping the link partner at IP address 192.168.2.10 from interface eth1.
+In this example we ping the link partner at IP address 192.168.2.98 from interface end4.
 
 ```
-root@axieth:~# ping -I eth1 192.168.2.10
-PING 192.168.2.10 (192.168.2.10): 56 data bytes
-64 bytes from 192.168.2.10: seq=0 ttl=128 time=0.545 ms
-64 bytes from 192.168.2.10: seq=1 ttl=128 time=0.455 ms
-64 bytes from 192.168.2.10: seq=2 ttl=128 time=0.380 ms
-64 bytes from 192.168.2.10: seq=3 ttl=128 time=0.356 ms
+root@zcu102-axieth-sgmii-2025-2:~# ping -I end4 192.168.2.98
+PING 192.168.2.98 (192.168.2.98): 56 data bytes
+64 bytes from 192.168.2.98: seq=0 ttl=64 time=0.359 ms
+64 bytes from 192.168.2.98: seq=1 ttl=64 time=0.199 ms
+64 bytes from 192.168.2.98: seq=2 ttl=64 time=0.231 ms
+64 bytes from 192.168.2.98: seq=3 ttl=64 time=0.161 ms
 ```
 
 

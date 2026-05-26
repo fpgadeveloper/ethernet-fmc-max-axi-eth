@@ -1,22 +1,24 @@
 # Stand-alone lwIP Echo Server
 
-These reference designs can be used with the stand-alone lwIP echo server application template that is 
-part of Vitis; however, some modifications are required. The lwIP library needs some modifications to be able to 
-properly configure the TI PHYs (DP83867) that are on the Ethernet FMC Max. The `Vitis` directory of the 
-source repository contains a script that can be used to setup a Vitis workspace containing the echo server 
-application and the modified lwIP library.
+These reference designs use the standalone lwIP echo-server application
+template that ships with Vitis, layered with local modifications needed to
+drive the TI DP83867 PHYs on the Ethernet FMC Max. The `Vitis/` directory of
+the repository contains a universal Vitis Python build driver
+(`py/build-vitis.py`, configured by `py/args.json`) that creates the
+workspace, registers a local `embeddedsw` software repository containing the
+patched lwIP sources, and builds the application.
 
 The build script does the following:
 
-1. Creates a Vitis workspace in the `Vitis` directory of the source repository.
-2. Creates a subdirectory called `embeddedsw` to be used as a local software repository
-   containing the modified lwIP library.
-3. Copies the sources from the `EmbeddedSw` directory of the repository to the local 
-   software repository (`embeddedsw`), then copies any remaining/unmodified sources
-   from the Vitis installation directory into the local software repository.
-4. Generates a lwIP Echo Server example application for each exported Vivado design
-   that is found in the `Vivado` directory. Most users will only have one exported
-   Vivado design.
+1. Creates a Vitis workspace at `Vitis/<target>_workspace`.
+2. Creates a subdirectory called `embeddedsw` inside the workspace to be used
+   as a local software repository containing the modified lwIP library
+   (sourced from the repo's `EmbeddedSw/` directory).
+3. Copies the modified sources from `EmbeddedSw/` over the corresponding
+   stock files copied in from the Vitis installation, so the local repository
+   has both the modifications and the unchanged supporting files.
+4. Generates a lwIP Echo Server application linked against that local
+   `embeddedsw` repository for the selected target.
 
 ## Building the Vitis workspace
 
@@ -49,33 +51,41 @@ application. You can view the UART output of the application in a console window
 appear as follows:
 
 ```
+Zynq MP First Stage Boot Loader 
+Release 2025.2   Apr  8 2026  -  19:29:19
+PMU-FW is not running, certain applications may not be supported.
+
+
 -----lwIP TCP echo server ------
 TCP packets sent to port 6001 will be echoed back
 Targeting PORT0 of the Ethernet FMC Max, External PHY address 1
-Start TI PHY autonegotiation 
-Waiting for Link to be up
+Start TI PHY autonegotiation
+Waiting for Link to be up 
 Auto negotiation completed for TI PHY
-Start PHY autonegotiation
+Start PHY autonegotiation 
 Waiting for PHY to complete autonegotiation.
 autonegotiation complete 
 auto-negotiated link speed: 1000
-Board IP: 192.168.1.116
+Board IP: 192.168.2.72
 Netmask : 255.255.255.0
-Gateway : 192.168.1.1
+Gateway : 192.168.2.1
 TCP echo server started @ port 7
 ```
 
-The above output results when the target port is connected to a router with DHCP. The assigned
-board IP can vary.
+The above output (captured from a ZCU106 run) results when the target port is connected to
+a router with DHCP. The assigned board IP will vary.
+
+On Versal targets you'll also see a PLM banner and a `VADJ: 1.5V enabled successfully`
+line ahead of the echo-server header — `vadj_enable(VADJ_1V5)` runs at the top of `main()`
+to bring the FMC adjustable rail up to 1.5V via the on-board power controller before the
+PHYs are released from reset (see `Vitis/common/src/vadj.c`).
 
 ## UART settings
 
 To receive the UART output of this standalone application, you will need to connect the
 USB-UART of the development board to your PC and run a console program such as 
-[Putty]. The following UART settings must be used:
-
-* Microblaze designs: 9600 baud
-* ZynqMP and Versal designs: 115200 baud
+[Putty]. All targets in this repo use 115200 baud, 8N1 (the MicroBlaze AXI UART Lite
+is also configured for 115200 in `Vivado/src/bd/bd_mb.tcl`).
 
 ## IP address
 

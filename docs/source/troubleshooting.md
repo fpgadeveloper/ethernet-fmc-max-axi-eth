@@ -18,18 +18,44 @@ Check the following if the project fails to build or generate a bitstream:
 
 ## PetaLinux issues
 
+### Build fails with `bitbake petalinux-image-minimal failed` and sstate fetch errors
+
+If `make petalinux TARGET=<board>` ends with errors like:
+
+```
+ERROR: <package>-<ver>-r0 do_..._setscene: Fetcher failure: Unable to find file file://.../sstate:...
+[ERROR] Command bitbake petalinux-image-minimal failed
+```
+
+the build is not actually broken. These `_setscene` errors come from bitbake
+trying to pull prebuilt artifacts from the public Xilinx sstate-cache mirror,
+which intermittently returns 404 for individual packages. Bitbake falls back
+to building them locally and succeeds, but exits non-zero because of the
+failed fetches, so the Makefile stops before `petalinux-package` runs and no
+`BOOT.BIN` is produced.
+
+**Fix: re-run the same command.** The second attempt finds the missing
+packages in the local sstate cache populated by the first run and completes
+cleanly. This is a mirror issue, not a problem with the reference design.
+
+
 ### Ports not working
 
 Check the following if you are unable to get ports working in PetaLinux.
 
 1. **Check the interface-to-port assignment for your design**   
-   The assignment of interfaces (eg. eth0, eth1, eth2, etc) to ports (eg. Ethernet FMC Max port 0, 1, 2 and 3) is specific to the design that
-   you are using. The interface to port assignment is documented [here](https://axieth-sgmii.ethernetfmc.com/en/latest/petalinux.html#port-configurations).
+   The assignment of interfaces (`end0`, `end1`, `end2`, etc. — PetaLinux 2025.2 uses the
+   `endN` predictable naming) to physical Ethernet FMC Max ports is specific to the target
+   design. See the [Port configurations](petalinux.md#port-configurations) section for the
+   per-target mapping. Note that on ZynqMP designs the development board's onboard Ethernet
+   port also appears (typically as `end3`), and on Versal it appears at `end4`/`end5`.
 
 2. **Each port must be assigned to a different subnet**   
-   If you assign interface eth0 to IP address 192.168.1.10, then you must use a different subnet for the IP address of eth1, eth2 and eth3.
-   Multiple ports that are managed under Linux must be assigned to different subnets, or they will not work.
-   An example address assignment would be eth0=192.168.1.10, eth1=192.168.2.10, eth2=192.168.3.10, eth3=192.168.4.10.
+   If you assign one interface to IP address 192.168.1.10, then you must use a different
+   subnet for the IP addresses of the other interfaces. Multiple ports that are managed
+   under Linux must be assigned to different subnets, or they will not work.
+   For example: `end0=192.168.1.10`, `end1=192.168.2.10`, `end2=192.168.3.10`,
+   `end4=192.168.4.10`.
 
 ### Dropped pings/packets
 
