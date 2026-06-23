@@ -116,12 +116,7 @@ def get_petalinux_targets(data):
     for design in data['designs']:
         if not design['petalinux']:
             continue
-        lanecfg = 'ports-'
-        for lane in range(4):
-            if lane in design['lanes']:
-                lanecfg += str(lane)
-            else:
-                lanecfg += 'x'
+        lanecfg = design.get('portcfg', '')
         template = templates[design['group']]
         target = '{}_target := {} {} {} {}'.format(design['label'],template,design['flashsize'],design['flashintf'],lanecfg)
         targets.append(target)

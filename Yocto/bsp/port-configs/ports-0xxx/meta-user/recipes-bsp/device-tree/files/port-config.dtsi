@@ -2,8 +2,11 @@
 // Copyright (C) 2025-2026, Opsero Electronic Design Inc.  All rights reserved.
 
 /*
- * Ethernet FMC Max AXI Ethernet port config: ports-0--- (ported from PetaLinux bsp/ports-0xxx).
- * Per-port wiring layered on the SDT-generated Linux device tree.
+ * Ethernet FMC Max AXI Ethernet port config: ports-0xxx.
+ *
+ * Per-port external-PHY wiring (MAC address, phy-handle, MDIO bus, phy-mode)
+ * layered on the SDT-generated Linux device tree. Selected per target by
+ * Yocto/scripts/configure-build.sh from the target's lane-derived port config.
  */
 
 &axi_ethernet_0 {  
