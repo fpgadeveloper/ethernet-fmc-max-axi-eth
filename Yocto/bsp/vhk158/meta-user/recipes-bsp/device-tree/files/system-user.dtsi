@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: MIT
+// Copyright (C) 2025-2026, Opsero Electronic Design Inc.  All rights reserved.
+
+/*
+ * SoC-side board fixups for vhk158 (Versal), layered on top of the
+ * gen-machineconf / lopper-generated Linux device tree (which already carries
+ * the PS config and the design's PL hardware from the XSA). Scoped to the Linux
+ * domain by device-tree.bbappend. Ported from the Ethernet FMC Max AXI Ethernet PetaLinux BSP.
+ */
+
+

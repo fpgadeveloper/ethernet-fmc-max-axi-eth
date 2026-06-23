@@ -18,6 +18,7 @@ This is the documentation for the AXI 1G Ethernet reference designs for the `Eth
    build_instructions
    echo_server
    petalinux
+   yocto
    advanced
    troubleshooting
    revision_history

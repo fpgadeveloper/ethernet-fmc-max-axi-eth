@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: MIT
+// Copyright (C) 2025-2026, Opsero Electronic Design Inc.  All rights reserved.
+
+/*
+ * SoC-side board fixups for vek280 (Versal), layered on top of the
+ * gen-machineconf / lopper-generated Linux device tree (which already carries
+ * the PS config and the design's PL hardware from the XSA). Scoped to the Linux
+ * domain by device-tree.bbappend. Ported from the Ethernet FMC Max AXI Ethernet PetaLinux BSP.
+ */
+
+/ {
+
+reserved-memory {
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges;
+        pl_ddr: buffer@0
+        {
+        no-map;
+        reg = <0x08 0x00 0x00 0x80000000>;
+        };
+
+        lpddr_memory: buffer@1
+        {
+        no-map;
+        reg = <0x500 0x0 0x2 0x0>;
+        };
+
+};
+
+
+};
+
+&amba_pl {
+        zyxclmm_drm {
+                compatible = "xlnx,zocl-versal";
+        };
+};
