@@ -35,9 +35,10 @@
       ],
       "connector": "HPC",
       "group": "fpga",
-      "petalinux": true,
+      "petalinux": false,
       "baremetal": true,
       "license": false,
+      "ip_license": true,
       "flashsize": "64",
       "flashintf": "SPIx4"
     },
@@ -56,9 +57,10 @@
       ],
       "connector": "HPC",
       "group": "fpga",
-      "petalinux": true,
+      "petalinux": false,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "32",
       "flashintf": "SPIx4"
     },
@@ -80,6 +82,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": false,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -101,6 +104,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -122,6 +126,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -143,6 +148,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -164,6 +170,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -185,6 +192,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -206,6 +214,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -227,6 +236,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -248,6 +258,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -266,9 +277,10 @@
       ],
       "connector": "FMCP",
       "group": "fpga",
-      "petalinux": true,
+      "petalinux": false,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "128",
       "flashintf": "SPIx4"
     },
@@ -290,6 +302,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -311,6 +324,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -329,6 +343,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": false,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -350,6 +365,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": false,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -371,6 +387,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -392,6 +409,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     },
@@ -413,6 +431,7 @@
       "petalinux": true,
       "baremetal": true,
       "license": true,
+      "ip_license": true,
       "flashsize": "0",
       "flashintf": "0"
     }
