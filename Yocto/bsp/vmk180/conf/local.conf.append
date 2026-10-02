@@ -1,0 +1,26 @@
+# Copyright (C) 2025-2026, Opsero Electronic Design Inc.  All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+
+# Ethernet FMC Max AXI Ethernet overrides for vmk180 (Versal), EDF flow.
+# bsp/vmk180 gets its own MACHINE/SDT from its own Vivado XSA via
+# gen-machineconf parse-sdt (PS + PL device tree derived from hardware);
+# MACHINE is NOT pinned. Versal EDF wks partitions esp(vfat)/storage/root(ext4); console comes
+# from the SDT. Bump CMA if a target needs larger DMA buffers.
+
+# Kernel command line. APPEND is NOT read by the EDF boot flow. On Versal the
+# cmdline is the `options` line of the systemd-boot entry (meta-amd-edf
+# versal/edf-linux.conf: console=ttyAMA0 earlycon=pl011,... root=PARTUUID=...
+# ro rootwait uio_pdrv_genirq.of_id=generic-uio). BSP_EXTRA_BOOTARGS is
+# appended to it by meta-user/recipes-core/systemd/systemd-bootconf-edf_%.bbappend.
+# Design args follow PetaLinux/bsp/vmk180 CONFIG_SUBSYSTEM_USER_CMDLINE.
+# No "rw": root is mounted ro and systemd-remount-fs remounts it rw (fstab "/" defaults).
+BSP_EXTRA_BOOTARGS = "clk_ignore_unused cma=1536M"
+
+# Hostname. meta-amd-edf's distro conf sets hostname:pn-base-files:amd-edf =
+# "amd-edf"; it is parsed after local.conf and its extra override outranks a
+# plain hostname:pn-base-files, so use :forcevariable (last in OVERRIDES).
+hostname:pn-base-files:forcevariable = "vmk180-axieth-2025-2"
+
+# Reserve space in the rootfs for image-time installs.
+IMAGE_ROOTFS_EXTRA_SPACE = "524288"

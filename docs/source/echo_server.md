@@ -1,52 +1,89 @@
 # Stand-alone lwIP Echo Server
 
-These reference designs use the standalone lwIP echo-server application
-template that ships with Vitis, layered with local modifications needed to
-drive the TI DP83867 PHYs on the Ethernet FMC Max. The `Vitis/` directory of
-the repository contains a universal Vitis Python build driver
-(`py/build-vitis.py`, configured by `py/args.json`) that creates the
-workspace, registers a local `embeddedsw` software repository containing the
-patched lwIP sources, and builds the application.
+The standalone (bare-metal) application is the quickest way to check the hardware: it brings one
+port of the [Ethernet FMC Max] up, gets an IP address, and echoes back any TCP data sent to it.
+It is available for every target, including the MicroBlaze targets, and it can be built and run
+on Windows as well as Linux.
 
-The build script does the following:
+The application is the lwIP echo-server template that ships with Vitis, layered with local
+modifications needed to drive the TI DP83867 PHYs of the Ethernet FMC Max over SGMII. The
+`Vitis/` directory of the repository contains a Vitis Python build driver
+(`py/build-vitis.py`, configured by `py/args.json`) that creates the workspace, registers a local
+software repository containing the patched lwIP sources (from the repo's `EmbeddedSw/`
+directory), and builds the application.
 
-1. Creates a Vitis workspace at `Vitis/<target>_workspace`.
-2. Creates a subdirectory called `embeddedsw` inside the workspace to be used
-   as a local software repository containing the modified lwIP library
-   (sourced from the repo's `EmbeddedSw/` directory).
-3. Copies the modified sources from `EmbeddedSw/` over the corresponding
-   stock files copied in from the Vitis installation, so the local repository
-   has both the modifications and the unchanged supporting files.
-4. Generates a lwIP Echo Server application linked against that local
-   `embeddedsw` repository for the selected target.
+## Requirements
 
-## Building the Vitis workspace
+* Vivado 2025.2 and Vitis 2025.2 (Windows or Linux), with the licences listed in
+  [Requirements](requirements).
+* The [Ethernet FMC Max] fitted on the FMC connector of your target (see the target tables in
+  the [build instructions](build_instructions.md#target-designs)).
+* A USB cable for the board's USB-UART, and the JTAG cable (on most AMD boards both are on the
+  same USB connector).
+* For the Zynq UltraScale+ and Versal targets, optionally an SD card to boot from.
+* An Ethernet cable from the port under test to a PC, or to a router/switch with a DHCP server
+  on the same network as the PC.
 
-To build the Vitis workspace and example application, you must first generate
-the Vivado project hardware design (the bitstream) and export the hardware.
-Once the bitstream is generated and exported, then you can build the
-Vitis workspace using the provided scripts. Follow the
-[build instructions](/build_instructions.md#build-vitis-workspace) — the
-steps are the same on Windows and Linux.
+## Build
+
+```
+./build.sh standalone --target <target>
+```
+
+This builds the Vivado project and XSA first if needed, creates the Vitis workspace in
+`Vitis/<target>_workspace`, builds the application and packages the boot files into
+`Vitis/boot/<target>/`:
+
+| Device family | Files in `Vitis/boot/<target>/` |
+|---------------|----------------------------------|
+| Zynq UltraScale+, Versal | `BOOT.BIN` (boot loader, bitstream/PDI and the echo server) |
+| MicroBlaze (AUBoard, KCU105, VCU118) | `axieth.bit` (bitstream) and `echo_server.elf` (application) |
+
+`./build.sh package --target <target>` (or `./build.sh all`) also zips these files into
+`bootimages/ethernet-fmc-max-axi-eth_<target>_standalone-2025-2.zip`.
 
 ## Run the application
 
-You must have followed the build instructions before you can run the application.
+Open a terminal on the board's USB-UART first (115200 baud, 8N1; see [UART settings](#uart-settings))
+so that you see the application's output from the start.
 
-1. Launch the Xilinx Vitis GUI.
-2. When asked to select the workspace path, select the `Vitis/<target>_workspace` directory.
-3. Power up your hardware platform and ensure that the JTAG is connected properly.
-4. In the Vitis Explorer panel, double-click on the System project that you want to run -
-   this will reveal the application contained in the project. The System project will have 
-   the postfix "_system".
-5. Now right click on the application "echo_server" then navigate the
-   drop down menu to **Run As->Launch on Hardware (Single Application Debug (GDB)).**
+### Zynq UltraScale+ and Versal: boot from SD card
+
+1. Format an SD card with a single FAT32 partition and copy `Vitis/boot/<target>/BOOT.BIN` onto
+   it.
+2. Insert the card, set the board's boot-mode switches to SD boot (see
+   [Boot PetaLinux](petalinux.md#boot-petalinux) for the per-board settings) and power on.
+
+### Zynq UltraScale+ and Versal: run from Vitis over JTAG
+
+1. Launch the Vitis GUI and select the `Vitis/<target>_workspace` directory as the workspace.
+2. Set the board's boot-mode switches to JTAG (see [Boot via JTAG](petalinux.md#setup-hardware)),
+   connect the JTAG cable and power on.
+3. In the Vitis Explorer panel, expand the System project (postfix `_system`), right-click the
+   `echo_server` application and select **Run As → Launch on Hardware (Single Application
+   Debug (GDB))**.
 
 ![Vitis Launch on hardware](images/vitis-single-application-debug.png)
 
-The run configuration will first program the FPGA with the bitstream, then load and run the 
-application. You can view the UART output of the application in a console window and it should
-appear as follows:
+The run configuration programs the device, then loads and runs the application.
+
+### MicroBlaze targets (AUBoard, KCU105, VCU118)
+
+Program the bitstream and download the application over JTAG, either from the Vitis GUI as
+above, or with the Xilinx System Debugger (`xsdb`, installed with Vitis):
+
+```
+xsdb
+xsdb% connect
+xsdb% fpga Vitis/boot/<target>/axieth.bit
+xsdb% targets -set -filter {name =~ "MicroBlaze #0*"}
+xsdb% dow Vitis/boot/<target>/echo_server.elf
+xsdb% con
+```
+
+## Expected output
+
+The UART output should look like this (ZCU106, port 0 cabled to a router with DHCP):
 
 ```
 Zynq MP First Stage Boot Loader 
@@ -70,71 +107,77 @@ Gateway : 192.168.2.1
 TCP echo server started @ port 7
 ```
 
-The above output (captured from a ZCU106 run) results when the target port is connected to
-a router with DHCP. The assigned board IP will vary.
+The assigned board IP will vary. Check that:
 
-On Versal targets you'll also see a PLM banner and a `VADJ: 1.5V enabled successfully`
-line ahead of the echo-server header — `vadj_enable(VADJ_1V5)` runs at the top of `main()`
-to bring the FMC adjustable rail up to 1.5V via the on-board power controller before the
-PHYs are released from reset (see `Vitis/common/src/vadj.c`).
+* `Targeting PORT0 ... External PHY address 1` names the port you have cabled;
+* `auto-negotiated link speed` matches your link partner (1000, 100 or 10);
+* a `Board IP` is printed and the server starts on port 7.
+
+On Versal targets you will also see a PLM banner, a `VADJ: 1.5V enabled successfully` line ahead
+of the echo-server header, and lines reporting the PHY reset being asserted and released.
+`vadj_enable(VADJ_1V5)` runs at the top of `main()` to switch the FMC VADJ rail on (to 1.5 V)
+through the board's power controller, and the PHY resets (driven from PMC GPIO on Versal) are
+then pulsed by the patched lwIP adapter (see `Vitis/common/src/vadj.c` and
+`EmbeddedSw/ThirdParty/sw_services/lwip220_v1_3/`). On the VEK280, VADJ is already on and
+`vadj_enable` does nothing.
 
 ## UART settings
 
-To receive the UART output of this standalone application, you will need to connect the
-USB-UART of the development board to your PC and run a console program such as 
-[Putty]. All targets in this repo use 115200 baud, 8N1 (the MicroBlaze AXI UART Lite
-is also configured for 115200 in `Vivado/src/bd/bd_mb.tcl`).
+To receive the UART output of this standalone application, connect the USB-UART of the
+development board to your PC and run a console program such as [Putty] (Windows) or
+`screen`/`minicom` (Linux). All targets use 115200 baud, 8N1 (the MicroBlaze AXI UART Lite is
+also configured for 115200 in `Vivado/src/bd/bd_mb.tcl`).
 
 ## IP address
 
-By default, the echo server attempts to obtain an IP address from a DHCP server. This is useful
-if the echo server is connected to a network. Once the IP address is obtained, it is printed out
-in the UART console output.
+By default, the echo server requests an IP address from a DHCP server. Once the IP address is
+obtained, it is printed on the UART console.
 
-If instead the echo server is connected directly to a PC, the DHCP attempt will fail and the echo
-server's IP address will default to 192.168.1.10. To be able to communicate with the echo server
-from the PC, the PC should be configured with a fixed IP address on the same subnet, for example:
-192.168.1.20.
+If the echo server is connected directly to a PC, the DHCP request times out (`DHCP Timeout`)
+and the echo server uses the default IP address **192.168.1.10**. Configure the PC's NIC with a
+fixed address on the same subnet, for example 192.168.1.20, netmask 255.255.255.0.
 
-## Change the target port
+## Test the echo server
 
-The echo server example design currently can only target one Ethernet port at a time.
-Selection of the Ethernet port can be changed by modifying the ``ETHERNET_PORT`` define
-in the ``platform_config.h.in`` file located in the workspace application sources
-(eg. ``<target>_workspace/echo_server/src/platform_config.h.in``).
-Set ``ETHERNET_PORT`` to one of the following values:
+### Ping
 
-* ``0``: Ethernet FMC Port 0
-* ``1``: Ethernet FMC Port 1
-* ``2``: Ethernet FMC Port 2
-* ``3``: Ethernet FMC Port 3
+From a PC on the same network (or directly connected), ping the address printed on the console:
 
-## Example usage
-
-### Ping the port
-
-The echo server can be "pinged" from a connected PC, or if connected to a network, from
-another device on the network. The UART console output will tell you what the IP address of the 
-echo server is. To ping the echo server, use the `ping` command from a command console of a PC
-that is connected to the echo server (either directly or via network).
-
-Example command: `ping 192.168.1.10`
+```
+ping 192.168.1.10
+```
 
 ### Connect with telnet
 
-We can also connect to the echo server using telnet and confirm that it is sending back (echoing) the data
-that we are sending it. From the command prompt of a PC on the same network as the echo server, run the
-following command:
+Connect to the echo service (TCP port 7) and type a few characters; each line is sent back:
 
-Example command: `telnet 192.168.1.10 7`
+```
+telnet 192.168.1.10 7
+```
 
-The first argument of the telnet command specifies the IP address of the device to connect to (in our case
-the echo server). The last argument in the command specifies the port number, which should be 7 for the 
-echo server.
+## Change the target port
 
-In the blank screen that opens after running the command, you can type letters and they will be sent to the 
-echo server and be echoed back.
+The echo server uses one Ethernet port at a time, port 0 by default. To use another port, edit
+the `ETHERNET_PORT` define in `Vitis/<target>_workspace/echo_server/src/platform_config.h.in`:
 
+* ``0``: Ethernet FMC Max port 0
+* ``1``: Ethernet FMC Max port 1
+* ``2``: Ethernet FMC Max port 2
+* ``3``: Ethernet FMC Max port 3
 
+then rebuild the application in Vitis and run it again (for SD boot, regenerate the boot image
+in Vitis). The edit is made in the generated workspace, so it is lost if the workspace is
+deleted and rebuilt. The `zcu104` target has only port 0.
+
+## Troubleshooting
+
+* **`Waiting for Link to be up` never completes:** check the cable and the link partner, that
+  the card is on the right FMC connector for the target, and that VADJ is on (see
+  [Troubleshooting](troubleshooting.md#ports-not-working)).
+* **`DHCP Timeout` although a router is connected:** the port that is cabled is not the one the
+  application targets (`Targeting PORTn`); move the cable or change `ETHERNET_PORT`.
+* **No UART output:** check the COM port (boards with several UART channels use the first one
+  for the console) and the boot-mode switches.
+
+[Ethernet FMC Max]: https://docs.opsero.com/op080/datasheet/overview/
 [Putty]: https://www.putty.org
-

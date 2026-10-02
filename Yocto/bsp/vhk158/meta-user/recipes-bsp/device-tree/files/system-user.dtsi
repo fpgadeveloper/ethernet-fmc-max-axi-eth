@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: MIT
+// Copyright (C) 2025-2026, Opsero Electronic Design Inc.  All rights reserved.
+
+/*
+ * SoC-side board fixups for vhk158 (Versal), layered on top of the
+ * gen-machineconf / lopper-generated Linux device tree (which already carries
+ * the PS config and the design's PL hardware from the XSA). Scoped to the Linux
+ * domain by device-tree.bbappend. Ported from the Ethernet FMC Max AXI Ethernet PetaLinux BSP.
+ */
+
+/* Board RJ45 (GEM0 = u198 PHY; GEM1 is not used on this board): the SDT
+ * flow does not describe the board-level TI DP83867 PHY, so Linux falls
+ * back to the Generic PHY driver and the RGMII clock delays are never
+ * programmed - the link negotiates 1G but passes no packets.
+ * Values from the official versal-vhk158-revA.dts (PHY addr 1,
+ * RX delay 3.00 ns = 0xb, TX delay 2.75 ns = 0xa); reset-gpios omitted
+ * because the SDT device tree does not define the gpio1 label - the PHY
+ * powers up out of reset from straps. Same fix as the HW-verified
+ * 2x-qsfp28-fmc vck190 Yocto BSP, but NOT yet verified on a VHK158.
+ * No fixed MAC: the MAC stays random per boot (add a local-mac-address
+ * property to pin one).
+ */
+&gem0 {
+	phy-handle = <&gem0_phy>;
+	mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		gem0_phy: ethernet-phy@1 {
+			compatible = "ethernet-phy-id2000.a231";
+			reg = <1>;
+			ti,rx-internal-delay = <0xb>;
+			ti,tx-internal-delay = <0xa>;
+			ti,fifo-depth = <0x1>;
+			ti,dp83867-rxctrl-strap-quirk;
+		};
+	};
+};

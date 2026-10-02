@@ -33,6 +33,12 @@ the full description of the runner.
 This will also launch the build process for the corresponding Vivado project if that project
 has not already been built and its hardware exported.
 
+The output products are written to `PetaLinux/<target>/images/linux/`. For the Zynq
+UltraScale+ and Versal targets the files needed on the SD card are `BOOT.BIN`, `boot.scr`,
+`image.ub` and `rootfs.tar.gz`; `./build.sh package --target <target>` gathers them into
+`bootimages/ethernet-fmc-max-axi-eth_<target>_petalinux-2025-2.zip` (with `boot/` and `root/`
+folders matching the two SD-card partitions).
+
 ## Boot a MicroBlaze design (auboard, kcu105_hpc, vcu118_fmcp)
 
 The MicroBlaze designs do not boot from SD; instead the PetaLinux build
@@ -171,6 +177,13 @@ and then boot the kernel with help of linux-boot.elf to set kernel
 start and dtb addresses.
 ```
 
+### Log in
+
+When the boot completes, the console shows a login prompt with the hostname
+`<board>-axieth-sgmii-2025-2`. Log in as the PetaLinux default user `petalinux`; on first login
+you are asked to choose a password. Administrative commands (`ifconfig`, `ethtool`, `udhcpc`)
+need `sudo`.
+
 ## UART terminal
 
 You will need to setup a terminal emulator to use the PetaLinux command line over the USB-UART connection.
@@ -233,6 +246,10 @@ remaining `axi_ethernet_N` nodes have `xlnx,has-mdio = <0x1>` but an empty
 local MDIO node (see `PetaLinux/bsp/ports-0123/.../port-config.dtsi`).
 
 ## Example Usage
+
+[Using and testing the ports in Linux](linux_testing) is the complete guide to identifying the
+ports, checking the link with `ethtool`/`phytool`, testing speed negotiation and measuring
+throughput with `iperf3` (with expected results); it applies to PetaLinux and Yocto alike.
 
 The examples below are from a ZCU102 PetaLinux session. On Versal the
 interface names map differently — see the [Port configurations](#port-configurations)
@@ -355,6 +372,16 @@ PING 192.168.2.98 (192.168.2.98): 56 data bytes
 64 bytes from 192.168.2.98: seq=3 ttl=64 time=0.161 ms
 ```
 
+### Measure throughput
+
+Run `iperf3 -s` on a PC connected to the port, then on the board:
+
+```
+iperf3 -c <pc-ip> --bind-dev end4 -t 10        # board transmits
+iperf3 -c <pc-ip> --bind-dev end4 -t 10 -R     # board receives
+```
+
+See [Throughput with iperf3](linux_testing.md#throughput-with-iperf3) for the expected results.
 
 [Ethernet FMC Max]: https://docs.opsero.com/op080/datasheet/overview/
 [supported Linux distributions]: https://docs.amd.com/r/en-US/ug1144-petalinux-tools-reference-guide/Setting-Up-Your-Environment

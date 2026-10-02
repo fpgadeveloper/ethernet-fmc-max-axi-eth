@@ -24,7 +24,7 @@ Others can be built with the Vivado ML Standard Edition **without a license**. T
 following section contains a column specifying which designs require a license, and which can be built without a 
 license.
 
-Additionally, some designs use IP cores that are licensed separately from the Vivado edition itself (for example: TEMAC, XXV Ethernet, HDMI). The **IP License** column in the tables below indicates the designs that require such a license to generate a bitstream; evaluation licenses are generally available from AMD for testing.
+Additionally, these designs use the AXI 1G/2.5G Ethernet Subsystem, whose tri-mode MAC requires the AMD Tri-Mode Ethernet MAC (TEMAC) IP license, which is separate from the Vivado edition. The **IP License** column in the tables below indicates the designs that require such a license to generate a bitstream; an evaluation license is available from AMD for testing.
 
 
 ## Target designs
@@ -43,9 +43,9 @@ the FMC connector on which to connect the mezzanine card.
     {% if designs_in_group | length > 0 %}
 ### {{ group.name }} designs
 
-| Target board        | Target design     | Ports   | FMC Slot    | Standalone<br> Echo Server | PetaLinux | Vivado<br> Edition | IP<br>License |
-|---------------------|-------------------|---------|-------------|-----|-----|-----|-----|
-{% for design in data.designs %}{% if design.group == group.label and design.publish %}| [{{ design.board }}]({{ design.link }}) | `{{ design.label }}` | {{ design.lanes | length }}x | {{ design.connector }} | {% if design.baremetal %} ✅ {% else %} ❌ {% endif %} | {% if design.petalinux %} ✅ {% else %} ❌ {% endif %} | {{ "Enterprise" if design.license else "Standard 🆓" }} | {{ "Required" if design.ip_license else "-" }} |
+| Target board        | Target design     | Ports   | FMC Slot    | Standalone<br> Echo Server | PetaLinux | Yocto | Vivado<br> Edition | IP<br>License |
+|---------------------|-------------------|---------|-------------|-----|-----|-----|-----|-----|
+{% for design in data.designs %}{% if design.group == group.label and design.publish %}| [{{ design.board }}]({{ design.link }}) | `{{ design.label }}` | {{ design.lanes | length }}x | {{ design.connector }} | {% if design.baremetal %} ✅ {% else %} ❌ {% endif %} | {% if design.petalinux %} ✅ {% else %} ❌ {% endif %} | {% if design.yocto %} ✅ {% else %} ❌ {% endif %} | {{ "Enterprise" if design.license else "Standard 🆓" }} | {{ "Required" if design.ip_license else "-" }} |
 {% endif %}{% endfor %}
 {% endif %}
 {% endfor %}
@@ -83,7 +83,7 @@ To see the available targets and the state of a build:
 ```
 
 ```{note}
-The embedded Linux images (PetaLinux) can only be built on a
+The embedded Linux images (PetaLinux and Yocto) can only be built on a
 native Linux machine; everything else builds on Windows too. On Windows, the
 runner refuses the Linux-only stages up front and prints the exact command
 to run on the Linux machine. For Versal targets on Windows, the runner also
@@ -180,10 +180,25 @@ connection), you can follow these instructions.
 
 The PetaLinux builds will then be configured for offline build.
 
+### Build Yocto
+
+The Yocto (AMD EDF) build also requires a native Linux machine, with Vitis 2025.2 and Google's
+`repo` tool installed. The runner builds the Vivado XSA first if it does not already exist:
+
+```
+./build.sh yocto --target <target>
+```
+
+Valid targets for Yocto are:
+{% for design in data.designs if design.yocto and design.publish %} `{{ design.label }}`{{ ", " if not loop.last else "." }} {% endfor %}
+
+The output products are written to `Yocto/<target>/images/linux/`. See [Yocto](yocto) for the
+requirements, the SD-card preparation and how to boot and test the image.
+
 ### Build everything
 
 This builds everything that the target supports — the Vivado project and XSA,
-the standalone application and the PetaLinux image — and gathers the boot
+the standalone application, the PetaLinux image and the Yocto image — and gathers the boot
 images into `bootimages/*.zip`:
 
 ```
@@ -193,5 +208,18 @@ images into `bootimages/*.zip`:
 
 On Windows, `all` builds everything that the host can build and reports the
 Linux-only stages as `BLOCKED` rather than failing.
+
+`./build.sh package --target <target>` gathers the boot files of the stages that are built into
+`bootimages/ethernet-fmc-max-axi-eth_<target>_<flow>-2025-2.zip` (`<flow>` = `standalone`,
+`petalinux` or `yocto`). If a stage is rebuilt after its zip was written, `package` rewrites the
+zip with the newer files.
+
+### Cleaning up
+
+`./build.sh clean --target <target>` deletes everything generated for a target (it asks for
+confirmation). `./build.sh clean --target <target> --keep-boot` deletes only the large
+intermediate files (Vivado runs, the Vitis workspace, the PetaLinux and Yocto build
+directories) and keeps the XSA, the boot files, the Linux images and the `bootimages` zips, so
+the target can still be programmed and tested. A Yocto workspace alone can take tens of GB.
 
 [supported Linux distributions]: https://docs.amd.com/r/en-US/ug1144-petalinux-tools-reference-guide/Setting-Up-Your-Environment

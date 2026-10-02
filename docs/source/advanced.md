@@ -42,20 +42,21 @@ it.
 │       │   └── gt_locs.tcl    <- Per-target GT-quad placement constants
 │       └── constraints/
 │           └── <target>.xdc   <- One XDC per target (pin assignments, timing)
-└── Vitis/
-    ├── py/
-    │   ├── args.json          <- Repo-specific Vitis flow configuration
-    │   ├── build-vitis.py     <- Universal Vitis Python build driver
-    │   ├── make-boot.py       <- BOOT.BIN / .mcs packaging
-    │   ├── pre_build.py       <- Per-build hook (e.g. constants generation)
-    │   └── pre_platform_build.py
-    ├── common/
-    │   └── src/               <- Standalone application source (echo_server + VADJ)
-    └── <target>_workspace/    <- Per-target Vitis workspace (generated)
+├── Vitis/
+│   ├── py/
+│   │   ├── args.json          <- Repo-specific Vitis flow configuration
+│   │   └── …
+│   └── common/src/            <- Standalone application source
+└── Yocto/
+    ├── bsp/
+    │   ├── <board>/           <- Per-board EDF BSP (local.conf.append + meta-user layer)
+    │   └── port-configs/      <- ports-0123/, ports-0xxx/ port overlays (port-config.dtsi)
+    ├── scripts/               <- EDF build engine (workspace, configure, build, package)
+    └── README.md              <- Yocto flow internals
 ```
 
 Per-target build outputs are written to `Vivado/<target>/`,
-`Vitis/<target>_workspace/`, and `PetaLinux/<target>/`; packaged
+`Vitis/<target>_workspace/`, `PetaLinux/<target>/` and `Yocto/<target>/`; packaged
 boot-image zips are written to `bootimages/`. None of these are
 committed.
 
@@ -113,8 +114,10 @@ The build is organised into stages, each available as a sub-command:
 | `xsa`        | Synthesise, implement and export the hardware (`.xsa`).                                         |
 | `standalone` | Create the Vitis workspace, build the baremetal app, package `BOOT.BIN` / `.mcs`.              |
 | `petalinux`  | Create the PetaLinux project from the XSA, apply the BSP overlays, build and package.          |
+| `yocto`      | Generate a System Device Tree from the XSA, configure an AMD EDF workspace with the Yocto BSP, build the SD-card image. |
 | `package`    | Gather the built boot artifacts into `bootimages/*.zip`.                                        |
 | `all`        | Build every stage the target supports, then `package`.                                         |
+| `clean`      | Delete a target's generated outputs (`--keep-boot`: only the intermediates, keep the deliverables). |
 
 Run `./build.sh list` to see the targets and their attributes, `./build.sh
 status --target <t>` for per-stage artifact state, and `./build.sh --help`
@@ -408,6 +411,33 @@ adds U-Boot Kconfig options; `platform-top.h` overrides the U-Boot
 platform header; patches are listed in `SRC_URI:append` in
 `u-boot-xlnx_%.bbappend`.
 
+## Yocto side
+
+The Yocto (AMD EDF) flow does not use a PetaLinux project. For a target, `./build.sh yocto`:
+
+1. runs `sdtgen` on the target's XSA to produce a System Device Tree;
+2. creates an EDF workspace in `Yocto/<target>/` (layers fetched with `repo`) and generates the
+   machine configuration from the System Device Tree (`gen-machineconf parse-sdt`);
+3. adds the board BSP `Yocto/bsp/<board>/` (a `conf/local.conf.append` and a `meta-user`
+   layer) and the port overlay `Yocto/bsp/port-configs/<portcfg>/` named by the target's
+   `portcfg` field in `config/data.json`;
+4. builds the EDF disk image and copies the outputs to `Yocto/<target>/images/linux/`.
+
+Where to make changes:
+
+| Change | File |
+|--------|------|
+| Kernel command-line arguments | `BSP_EXTRA_BOOTARGS` in `Yocto/bsp/<board>/conf/local.conf.append` (added to `boot.scr` on Zynq UltraScale+ and to the systemd-boot entry on Versal) |
+| Hostname | `hostname:pn-base-files:forcevariable` in the same file |
+| Packages in the image | `IMAGE_INSTALL:append` in `meta-user/recipes-core/images/edf-linux-disk-image.bbappend` |
+| Board device-tree fixes | `meta-user/recipes-bsp/device-tree/files/system-user.dtsi` |
+| Ethernet FMC Max ports (PHYs, MACs) | `Yocto/bsp/port-configs/<portcfg>/…/port-config.dtsi` |
+| Kernel configuration | `meta-user/recipes-kernel/linux/linux-xlnx/bsp.cfg` |
+| U-Boot boot command (Versal VADJ / PHY reset) | `meta-user/recipes-bsp/u-boot/files/*-bootcmd.cfg` |
+| FSBL patch (ZCU104 VADJ) | `Yocto/bsp/zcu104/meta-user/recipes-bsp/embeddedsw/` |
+
+`Yocto/README.md` describes the flow in more detail.
+
 ## Modifications layered on the stock BSPs
 
 The board BSPs in this repository started as the corresponding stock
@@ -496,6 +526,7 @@ line in `device-tree.bbappend`).
 | `PetaLinux/<target>/`               | PetaLinux project. All Yocto build state lives here.                            |
 | `PetaLinux/<target>/images/linux/`  | `BOOT.BIN`, `image.ub`, `boot.scr`, `rootfs.tar.gz`, etc.                       |
 | `PetaLinux/<target>/build/build.log`| PetaLinux build log.                                                            |
-| `bootimages/`                       | Per-target zipped boot files (`<prj>_<target>_petalinux-<ver>.zip` and `<prj>_<target>_standalone-<ver>.zip`). |
+| `Yocto/<target>/images/linux/`      | `rootfs.wic.xz`, `rootfs.wic.bmap`, `BOOT.BIN`, `boot.scr`, `Image`, `system.dtb`, `rootfs.tar.gz`. |
+| `bootimages/`                       | Per-target zipped boot files (`<prj>_<target>_standalone-<ver>.zip`, `<prj>_<target>_petalinux-<ver>.zip`, `<prj>_<target>_yocto-<ver>.zip`). |
 
 None of these directories are committed to the repository.

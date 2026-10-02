@@ -30,6 +30,10 @@ extensions = [
   'myst_parser',
 ]
 
+# Generate HTML anchors for headings (h1-h3) so that links like
+# `petalinux.md#boot-petalinux` resolve.
+myst_heading_anchors = 3
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

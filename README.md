@@ -26,7 +26,7 @@ In order to test this design on hardware, you will need the following:
 
 * Vivado 2025.2
 * Vitis 2025.2
-* PetaLinux Tools 2025.2
+* PetaLinux Tools 2025.2 (PetaLinux flow) or Google's `repo` tool (Yocto flow), on a Linux machine
 * [Ethernet FMC Max]
 * One of the target platforms listed below
 * [Xilinx Soft TEMAC license](https://ethernetfmc.com/getting-a-license-for-the-xilinx-tri-mode-ethernet-mac/ "Xilinx Soft TEMAC license")
@@ -41,37 +41,37 @@ require a license to generate a bitstream with the AMD Xilinx tools.
 <!-- updater start -->
 ### FPGA designs
 
-| Target board          | Target design      | Ports       | FMC Slot    | Standalone<br> Echo Server | PetaLinux | Vivado<br> Edition | IP<br>License |
-|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|
-| [AUBoard]             | `auboard`          | 4x          | HPC         | :white_check_mark: | :x:   | Standard :free: | Required |
-| [KCU105]              | `kcu105_hpc`       | 4x          | HPC         | :white_check_mark: | :x:   | Enterprise | Required |
-| [VCU118]              | `vcu118_fmcp`      | 4x          | FMCP        | :white_check_mark: | :x:   | Enterprise | Required |
+| Target board          | Target design      | Ports       | FMC Slot    | Standalone<br> Echo Server | PetaLinux | Yocto | Vivado<br> Edition | IP<br>License |
+|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|-------|
+| [AUBoard]             | `auboard`          | 4x          | HPC         | :white_check_mark: | :x:   | :x:   | Standard :free: | Required |
+| [KCU105]              | `kcu105_hpc`       | 4x          | HPC         | :white_check_mark: | :x:   | :x:   | Enterprise | Required |
+| [VCU118]              | `vcu118_fmcp`      | 4x          | FMCP        | :white_check_mark: | :x:   | :x:   | Enterprise | Required |
 
 ### Zynq UltraScale+ designs
 
-| Target board          | Target design      | Ports       | FMC Slot    | Standalone<br> Echo Server | PetaLinux | Vivado<br> Edition | IP<br>License |
-|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|
-| [UltraZed-EV Carrier] | `uzev`             | 4x          | HPC         | :white_check_mark: | :white_check_mark: | Standard :free: | Required |
-| [ZCU102]              | `zcu102_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | Enterprise | Required |
-| [ZCU102]              | `zcu102_hpc1`      | 4x          | HPC1        | :white_check_mark: | :white_check_mark: | Enterprise | Required |
-| [ZCU104]              | `zcu104`           | 1x          | LPC         | :white_check_mark: | :white_check_mark: | Standard :free: | Required |
-| [ZCU106]              | `zcu106_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | Standard :free: | Required |
-| [ZCU111]              | `zcu111`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise | Required |
-| [ZCU208]              | `zcu208`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise | Required |
-| [ZCU216]              | `zcu216`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| Target board          | Target design      | Ports       | FMC Slot    | Standalone<br> Echo Server | PetaLinux | Yocto | Vivado<br> Edition | IP<br>License |
+|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|-------|
+| [UltraZed-EV Carrier] | `uzev`             | 4x          | HPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | Required |
+| [ZCU102]              | `zcu102_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| [ZCU102]              | `zcu102_hpc1`      | 4x          | HPC1        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| [ZCU104]              | `zcu104`           | 1x          | LPC         | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | Required |
+| [ZCU106]              | `zcu106_hpc0`      | 4x          | HPC0        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Standard :free: | Required |
+| [ZCU111]              | `zcu111`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| [ZCU208]              | `zcu208`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| [ZCU216]              | `zcu216`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
 
 ### Versal designs
 
-| Target board          | Target design      | Ports       | FMC Slot    | Standalone<br> Echo Server | PetaLinux | Vivado<br> Edition | IP<br>License |
-|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|
-| [VCK190]              | `vck190_fmcp1`     | 4x          | FMCP1       | :white_check_mark: | :white_check_mark: | Enterprise | Required |
-| [VCK190]              | `vck190_fmcp2`     | 4x          | FMCP2       | :white_check_mark: | :white_check_mark: | Enterprise | Required |
-| [VEK280]              | `vek280`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise | Required |
-| [VHK158]              | `vhk158`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise | Required |
-| [VMK180]              | `vmk180_fmcp1`     | 4x          | FMCP1       | :white_check_mark: | :white_check_mark: | Enterprise | Required |
-| [VMK180]              | `vmk180_fmcp2`     | 4x          | FMCP2       | :white_check_mark: | :white_check_mark: | Enterprise | Required |
-| [VPK120]              | `vpk120`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise | Required |
-| [VPK180]              | `vpk180`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| Target board          | Target design      | Ports       | FMC Slot    | Standalone<br> Echo Server | PetaLinux | Yocto | Vivado<br> Edition | IP<br>License |
+|-----------------------|--------------------|-------------|-------------|-------|-------|-------|-------|-------|
+| [VCK190]              | `vck190_fmcp1`     | 4x          | FMCP1       | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| [VCK190]              | `vck190_fmcp2`     | 4x          | FMCP2       | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| [VEK280]              | `vek280`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| [VHK158]              | `vhk158`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| [VMK180]              | `vmk180_fmcp1`     | 4x          | FMCP1       | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| [VMK180]              | `vmk180_fmcp2`     | 4x          | FMCP2       | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| [VPK120]              | `vpk120`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
+| [VPK180]              | `vpk180`           | 4x          | FMCP        | :white_check_mark: | :white_check_mark: | :white_check_mark: | Enterprise | Required |
 
 [AUBoard]: https://www.xilinx.com/products/boards-and-kits/1-1xj8wo9.html
 [KCU105]: https://www.xilinx.com/kcu105
@@ -99,14 +99,19 @@ Notes:
 
 ## Software
 
-These reference designs can be driven by either a standalone application or within a PetaLinux environment. 
-The repository includes all necessary scripts and code to build both environments. The table 
-below outlines the corresponding applications available in each environment:
+These reference designs can be driven by a standalone application or by embedded Linux, built
+with either PetaLinux or Yocto (AMD Embedded Development Framework). The repository includes all
+necessary scripts and code to build each environment. The table below outlines the
+corresponding applications available in each environment:
 
 | Environment      | Available Applications  |
 |------------------|-------------------------|
 | Standalone       | lwIP Echo Server |
 | PetaLinux        | Built-in Linux commands<br>Additional tools: ethtool, phytool, iperf3 |
+| Yocto            | Built-in Linux commands, OpenSSH server<br>Additional tools: ethtool, phytool, iperf3, mtd-utils, can-utils, nfs-utils, pciutils |
+
+The user guide explains how to boot each environment and how to test the ports, including
+expected iperf3 throughput.
 
 ## Build instructions
 
@@ -155,6 +160,15 @@ bit file, depending on the device family):
 ./build.sh petalinux --target <target>
 ```
 
+#### Build Yocto (Linux only)
+
+```
+./build.sh yocto --target <target>
+```
+
+The Yocto image is a complete SD-card image (`Yocto/<target>/images/linux/rootfs.wic.xz`);
+see the Yocto page of the user guide for writing it to an SD card.
+
 #### Build everything
 
 Builds all of the above that the target supports, then gathers the boot
@@ -165,7 +179,8 @@ images into `bootimages/*.zip`:
 ./build.sh all --target all          # every target in the repo
 ```
 
-Also available: `status`, `clean`, `project` — see
+Also available: `status`, `clean` (with `--keep-boot` to remove only the
+intermediate files), `project`, `package` — see
 `./build.sh --help`. On Windows, the PetaLinux and Yocto stages require a
 Linux machine; the runner says so and prints the hand-off command. The
 legacy `make` interface still works on Linux (each Makefile now wraps

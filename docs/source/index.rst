@@ -14,10 +14,13 @@ This is the documentation for the AXI 1G Ethernet reference designs for the `Eth
    :caption: User Guide
 
    description
+   design
    requirements
    build_instructions
    echo_server
    petalinux
+   yocto
+   linux_testing
    advanced
    troubleshooting
    revision_history
